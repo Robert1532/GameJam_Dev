@@ -18,11 +18,56 @@ public static class EdwinMainMenuSceneBuilder
     const string BgPath = "Assets/05_Assets/Edwin/Backgrounds/bg_preview.png";
     const string BtnPath = "Assets/05_Assets/Edwin/UI/button_start-preview.png";
     const string TitlePath = "Assets/05_Assets/Edwin/UI/title-preview.png";
+    const string MenuMusicAssetPath =
+        "Assets/05_Assets/Edwin/Audio/Music/monume-retro-arcade-game-music/monume-retro-arcade-game-music-509489.mp3";
+    const string StartClickAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-click.mp3";
+    const string StartHoverAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-hover.wav";
 
     [MenuItem("Edwin/Build Main Menu In Edwin Scene")]
     public static void BuildFromMenu()
     {
         BuildInternal(save: true);
+    }
+
+    /// <summary>
+    /// Añade <c>MenuMusicVolumeRoot</c> al Canvas de Edwin.unity sin borrar el menú (misma UI que en runtime horneado).
+    /// </summary>
+    [MenuItem("Edwin/Ensure Menu Music Slider In Edwin Scene")]
+    public static void EnsureMenuMusicSliderInEdwinScene()
+    {
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        var bootstrap = Object.FindFirstObjectByType<EdwinMainMenuBootstrap>();
+        if (bootstrap == null)
+        {
+            Debug.LogError("[EdwinMainMenuSceneBuilder] No hay EdwinMainMenuBootstrap en la escena.");
+            return;
+        }
+
+        var canvas = bootstrap.GetComponentInChildren<Canvas>(true);
+        if (canvas == null)
+        {
+            Debug.LogError("[EdwinMainMenuSceneBuilder] No hay Canvas bajo el bootstrap.");
+            return;
+        }
+
+        if (canvas.transform.Find("MenuMusicVolumeRoot") != null)
+        {
+            Debug.Log("[EdwinMainMenuSceneBuilder] MenuMusicVolumeRoot ya existe; no se duplica.");
+            return;
+        }
+
+        const int uiLayer = 5;
+        var slider = EdwinMainMenuBootstrap.BuildMenuMusicVolumeSliderUi(canvas.transform, uiLayer, 1);
+        if (slider == null)
+            return;
+
+        var soBoot = new SerializedObject(bootstrap);
+        var pVol = soBoot.FindProperty("menuMusicVolume");
+        slider.value = pVol != null ? pVol.floatValue : 0.2f;
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveOpenScenes();
+        Debug.Log("[EdwinMainMenuSceneBuilder] Añadido MenuMusicVolumeRoot (volumen menú) al Canvas.");
     }
 
     public static void BuildAndSave()
@@ -66,7 +111,8 @@ public static class EdwinMainMenuSceneBuilder
         }
 
         var root = new GameObject("MainMenu_Root");
-        root.AddComponent<EdwinMainMenuBootstrap>();
+        var bootstrap = root.AddComponent<EdwinMainMenuBootstrap>();
+        AssignMenuAudioClips(bootstrap);
 
         var esGo = new GameObject("EventSystem");
         esGo.transform.SetParent(root.transform, false);
@@ -146,6 +192,14 @@ public static class EdwinMainMenuSceneBuilder
 
         EdwinMainMenuBootstrap.AddPressStartHint(canvasGo.transform, uiLayer);
 
+        var volumeSlider = EdwinMainMenuBootstrap.BuildMenuMusicVolumeSliderUi(canvasGo.transform, uiLayer, 1);
+        if (volumeSlider != null)
+        {
+            var soBoot = new SerializedObject(bootstrap);
+            var pVol = soBoot.FindProperty("menuMusicVolume");
+            volumeSlider.value = pVol != null ? pVol.floatValue : 0.2f;
+        }
+
         EditorSceneManager.MarkSceneDirty(scene);
         if (save)
             EditorSceneManager.SaveOpenScenes();
@@ -158,6 +212,34 @@ public static class EdwinMainMenuSceneBuilder
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
         rt.localScale = Vector3.one;
+    }
+
+    static void AssignMenuAudioClips(EdwinMainMenuBootstrap bootstrap)
+    {
+        if (bootstrap == null)
+            return;
+
+        var music = AssetDatabase.LoadAssetAtPath<AudioClip>(MenuMusicAssetPath);
+        var click = AssetDatabase.LoadAssetAtPath<AudioClip>(StartClickAssetPath);
+        var hover = AssetDatabase.LoadAssetAtPath<AudioClip>(StartHoverAssetPath);
+        var so = new SerializedObject(bootstrap);
+        var m = so.FindProperty("menuBackgroundMusic");
+        var s = so.FindProperty("startButtonClickSfx");
+        var h = so.FindProperty("startButtonHoverSfx");
+        if (m != null)
+            m.objectReferenceValue = music;
+        if (s != null)
+            s.objectReferenceValue = click;
+        if (h != null)
+            h.objectReferenceValue = hover;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        if (music == null)
+            Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró música en " + MenuMusicAssetPath);
+        if (click == null)
+            Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró SFX clic en " + StartClickAssetPath);
+        if (hover == null)
+            Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró SFX hover en " + StartHoverAssetPath);
     }
 
     /// <summary>
