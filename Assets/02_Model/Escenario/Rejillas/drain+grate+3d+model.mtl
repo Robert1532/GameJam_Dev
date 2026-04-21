@@ -1,0 +1,6 @@
+newmtl tripo_material_72ef315e_9238_450d_9eca_a4f03a4f4b65
+Kd 1.000000000 1.000000000 1.000000000
+d 1.000000000
+illum 2
+map_Kd drain+grate+3d+model_basecolor.jpg
+
