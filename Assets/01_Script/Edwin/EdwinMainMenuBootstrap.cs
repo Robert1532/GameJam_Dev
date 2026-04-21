@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -18,6 +19,10 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     const string BgAssetPath = "Assets/05_Assets/Edwin/Backgrounds/bg_preview.png";
     const string BtnAssetPath = "Assets/05_Assets/Edwin/UI/button_start-preview.png";
     const string TitleAssetPath = "Assets/05_Assets/Edwin/UI/title-preview.png";
+    const string MenuMusicAssetPath =
+        "Assets/05_Assets/Edwin/Audio/Music/monume-retro-arcade-game-music/monume-retro-arcade-game-music-509489.mp3";
+    const string StartClickAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-click.mp3";
+    const string StartHoverAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-hover.wav";
 
     /// <summary>
     /// Unity 6+ ya no admite <c>Arial.ttf</c> como built-in; usar solo Legacy para UI generada por código.
@@ -174,20 +179,32 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         hint.raycastTarget = false;
     }
 
+    [SerializeField] AudioClip menuBackgroundMusic;
+    [SerializeField] AudioClip startButtonClickSfx;
+    [SerializeField] AudioClip startButtonHoverSfx;
+    [SerializeField, Range(0f, 1f)] float menuMusicVolume = 0.20f;
+    [SerializeField, Range(0f, 1f)] float startClickVolume = 1f;
+    [SerializeField, Range(0f, 1f)] float startHoverVolume = 1f;
+
     [SerializeField] string nextSceneName = "Main";
+
+    AudioSource _musicSource;
+    AudioSource _uiSfxSource;
+    static Sprite _cachedUiWhiteSprite;
 
     void Awake()
     {
         EnsureEventSystem();
+        ResolveMenuAudioClips();
+        EnsureMenuAudioPlayback();
 
         var canvas = GetComponentInChildren<Canvas>(true);
         if (canvas != null)
-        {
             WireStartButton(canvas.transform);
-            return;
-        }
+        else
+            BuildUiFromSprites();
 
-        BuildUiFromSprites();
+        SetupMenuMusicVolumeSlider();
     }
 
     void EnsureEventSystem()
@@ -246,8 +263,10 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     void ConfigureStartButton(Button button)
     {
         button.transition = Selectable.Transition.None;
-        if (button.GetComponent<EdwinStartButtonHoverAnim>() == null)
-            button.gameObject.AddComponent<EdwinStartButtonHoverAnim>();
+        var hover = button.GetComponent<EdwinStartButtonHoverAnim>();
+        if (hover == null)
+            hover = button.gameObject.AddComponent<EdwinStartButtonHoverAnim>();
+        hover.SetUiSfxSource(_uiSfxSource, startButtonHoverSfx, startHoverVolume);
     }
 
     void BuildUiFromSprites()
@@ -342,9 +361,278 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
 
     void OnStartClicked()
     {
+        PlayStartClickSound();
         if (string.IsNullOrWhiteSpace(nextSceneName))
             return;
+        StartCoroutine(LoadNextSceneAfterClickSfx());
+    }
+
+    IEnumerator LoadNextSceneAfterClickSfx()
+    {
+        var clip = startButtonClickSfx;
+        // Clips muy cortos: Unity a veces reporta duración casi 0; damos margen mínimo para el DSP.
+        var len = clip != null ? clip.length : 0f;
+        var wait = Mathf.Max(0.22f, len + 0.12f);
+        yield return new WaitForSecondsRealtime(wait);
         SceneManager.LoadScene(nextSceneName);
+    }
+
+    void ResolveMenuAudioClips()
+    {
+#if UNITY_EDITOR
+        if (menuBackgroundMusic == null)
+            menuBackgroundMusic = AssetDatabase.LoadAssetAtPath<AudioClip>(MenuMusicAssetPath);
+        if (startButtonClickSfx == null)
+            startButtonClickSfx = AssetDatabase.LoadAssetAtPath<AudioClip>(StartClickAssetPath);
+        if (startButtonHoverSfx == null)
+            startButtonHoverSfx = AssetDatabase.LoadAssetAtPath<AudioClip>(StartHoverAssetPath);
+#else
+        if (menuBackgroundMusic == null)
+            menuBackgroundMusic = Resources.Load<AudioClip>("Audio/EdwinMenuMusic");
+        if (startButtonClickSfx == null)
+            startButtonClickSfx = Resources.Load<AudioClip>("Audio/EdwinStartClick");
+        if (startButtonHoverSfx == null)
+            startButtonHoverSfx = Resources.Load<AudioClip>("Audio/EdwinStartHover");
+#endif
+    }
+
+    void EnsureMenuAudioPlayback()
+    {
+        var holder = transform.Find("MenuAudio_Root");
+        if (holder == null)
+        {
+            var root = new GameObject("MenuAudio_Root");
+            root.transform.SetParent(transform, false);
+
+            var mGo = new GameObject("MenuMusic");
+            mGo.transform.SetParent(root.transform, false);
+            _musicSource = mGo.AddComponent<AudioSource>();
+            _musicSource.playOnAwake = false;
+            _musicSource.loop = true;
+            _musicSource.spatialBlend = 0f;
+
+            var sGo = new GameObject("MenuUiSfx");
+            sGo.transform.SetParent(root.transform, false);
+            _uiSfxSource = sGo.AddComponent<AudioSource>();
+            _uiSfxSource.playOnAwake = false;
+            _uiSfxSource.loop = false;
+            _uiSfxSource.spatialBlend = 0f;
+            _uiSfxSource.volume = 1f;
+            _uiSfxSource.dopplerLevel = 0f;
+            _uiSfxSource.ignoreListenerPause = true;
+        }
+        else
+        {
+            _musicSource = holder.Find("MenuMusic")?.GetComponent<AudioSource>();
+            _uiSfxSource = holder.Find("MenuUiSfx")?.GetComponent<AudioSource>();
+            if (_uiSfxSource == null)
+            {
+                var sGo = new GameObject("MenuUiSfx");
+                sGo.transform.SetParent(holder, false);
+                _uiSfxSource = sGo.AddComponent<AudioSource>();
+                _uiSfxSource.playOnAwake = false;
+                _uiSfxSource.loop = false;
+                _uiSfxSource.spatialBlend = 0f;
+                _uiSfxSource.volume = 1f;
+                _uiSfxSource.dopplerLevel = 0f;
+                _uiSfxSource.ignoreListenerPause = true;
+            }
+        }
+
+        if (_uiSfxSource != null)
+            _uiSfxSource.volume = 1f;
+
+        if (_musicSource != null)
+        {
+            _musicSource.volume = menuMusicVolume;
+            _musicSource.clip = menuBackgroundMusic;
+            if (menuBackgroundMusic != null && !_musicSource.isPlaying)
+                _musicSource.Play();
+        }
+    }
+
+    void PlayStartClickSound()
+    {
+        EnsureMenuAudioPlayback();
+        ResolveMenuAudioClips();
+        if (startButtonClickSfx == null)
+            return;
+
+        if (startButtonClickSfx.loadState == AudioDataLoadState.Unloaded)
+            startButtonClickSfx.LoadAudioData();
+
+        if (_uiSfxSource == null)
+            return;
+
+        var vol = Mathf.Clamp01(startClickVolume);
+        _uiSfxSource.enabled = true;
+        _uiSfxSource.playOnAwake = false;
+        _uiSfxSource.loop = false;
+        _uiSfxSource.spatialBlend = 0f;
+        _uiSfxSource.panStereo = 0f;
+        _uiSfxSource.priority = 0;
+        _uiSfxSource.ignoreListenerPause = true;
+        _uiSfxSource.mute = false;
+        _uiSfxSource.volume = 1f;
+        _uiSfxSource.PlayOneShot(startButtonClickSfx, vol);
+    }
+
+    void OnMenuMusicVolumeSliderChanged(float value)
+    {
+        menuMusicVolume = value;
+        if (_musicSource != null)
+            _musicSource.volume = menuMusicVolume;
+    }
+
+    /// <summary>
+    /// Crea el bloque de volumen (misma jerarquía / estilo que <c>PressStartHint</c> en Edwin.unity).
+    /// <paramref name="siblingIndex"/> = posición entre hijos del Canvas (p. ej. 1 = justo debajo del fondo).
+    /// No registra listeners; el bootstrap los enlaza en <see cref="SetupMenuMusicVolumeSlider"/>.
+    /// </summary>
+    public static Slider BuildMenuMusicVolumeSliderUi(Transform canvas, int uiLayer, int siblingIndex)
+    {
+        if (canvas == null)
+            return null;
+
+        var rootGo = new GameObject("MenuMusicVolumeRoot");
+        rootGo.transform.SetParent(canvas, false);
+        rootGo.transform.SetSiblingIndex(Mathf.Clamp(siblingIndex, 0, canvas.childCount - 1));
+        rootGo.layer = uiLayer;
+
+        var rootRt = rootGo.AddComponent<RectTransform>();
+        // Misma anchura que PressStartHint (800); anclaje inferior como el resto del menú horneado.
+        rootRt.anchorMin = new Vector2(0.5f, 0.08f);
+        rootRt.anchorMax = new Vector2(0.5f, 0.08f);
+        rootRt.pivot = new Vector2(0.5f, 0.5f);
+        rootRt.sizeDelta = new Vector2(800f, 56f);
+        rootRt.anchoredPosition = new Vector2(0f, 10f);
+
+        var capGo = new GameObject("Caption");
+        capGo.transform.SetParent(rootGo.transform, false);
+        capGo.layer = uiLayer;
+        var capRt = capGo.AddComponent<RectTransform>();
+        capRt.anchorMin = new Vector2(0f, 0.52f);
+        capRt.anchorMax = new Vector2(1f, 1f);
+        capRt.offsetMin = Vector2.zero;
+        capRt.offsetMax = Vector2.zero;
+        var capText = capGo.AddComponent<Text>();
+        capText.text = "Menu music volume";
+        capText.font = MenuBuiltinFont();
+        capText.fontSize = 22;
+        capText.fontStyle = FontStyle.Normal;
+        capText.alignment = TextAnchor.UpperCenter;
+        capText.color = new Color(0.82f, 0.76f, 0.64f, 0.9f);
+        capText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        capText.verticalOverflow = VerticalWrapMode.Overflow;
+        capText.raycastTarget = false;
+
+        var sliderGo = new GameObject("Slider");
+        sliderGo.transform.SetParent(rootGo.transform, false);
+        sliderGo.layer = uiLayer;
+        var sliderRt = sliderGo.AddComponent<RectTransform>();
+        sliderRt.anchorMin = new Vector2(0f, 0f);
+        sliderRt.anchorMax = new Vector2(1f, 0.46f);
+        sliderRt.offsetMin = new Vector2(0f, 2f);
+        sliderRt.offsetMax = new Vector2(0f, -2f);
+
+        var white = UiWhiteSprite();
+        var bgGo = new GameObject("Background");
+        bgGo.transform.SetParent(sliderGo.transform, false);
+        bgGo.layer = uiLayer;
+        var bgRt = bgGo.AddComponent<RectTransform>();
+        StretchFull(bgRt);
+        var bgImg = bgGo.AddComponent<Image>();
+        bgImg.sprite = white;
+        bgImg.color = new Color(0.12f, 0.12f, 0.14f, 0.88f);
+
+        var fillArea = new GameObject("Fill Area");
+        fillArea.transform.SetParent(sliderGo.transform, false);
+        fillArea.layer = uiLayer;
+        var fillAreaRt = fillArea.AddComponent<RectTransform>();
+        fillAreaRt.anchorMin = Vector2.zero;
+        fillAreaRt.anchorMax = Vector2.one;
+        fillAreaRt.offsetMin = new Vector2(6f, 4f);
+        fillAreaRt.offsetMax = new Vector2(-6f, -4f);
+
+        var fillGo = new GameObject("Fill");
+        fillGo.transform.SetParent(fillArea.transform, false);
+        fillGo.layer = uiLayer;
+        var fillRt = fillGo.AddComponent<RectTransform>();
+        fillRt.anchorMin = Vector2.zero;
+        fillRt.anchorMax = new Vector2(0f, 1f);
+        fillRt.pivot = new Vector2(0f, 0.5f);
+        fillRt.sizeDelta = Vector2.zero;
+        fillRt.anchoredPosition = Vector2.zero;
+        var fillImg = fillGo.AddComponent<Image>();
+        fillImg.sprite = white;
+        fillImg.type = Image.Type.Simple;
+        fillImg.color = new Color(0.82f, 0.68f, 0.28f, 0.95f);
+
+        var handleSlide = new GameObject("Handle Slide Area");
+        handleSlide.transform.SetParent(sliderGo.transform, false);
+        handleSlide.layer = uiLayer;
+        var hsRt = handleSlide.AddComponent<RectTransform>();
+        hsRt.anchorMin = Vector2.zero;
+        hsRt.anchorMax = Vector2.one;
+        hsRt.offsetMin = new Vector2(6f, 4f);
+        hsRt.offsetMax = new Vector2(-6f, -4f);
+
+        var handleGo = new GameObject("Handle");
+        handleGo.transform.SetParent(handleSlide.transform, false);
+        handleGo.layer = uiLayer;
+        var handleRt = handleGo.AddComponent<RectTransform>();
+        handleRt.sizeDelta = new Vector2(22f, 0f);
+        handleRt.anchorMin = new Vector2(0f, 0f);
+        handleRt.anchorMax = new Vector2(0f, 1f);
+        handleRt.pivot = new Vector2(0.5f, 0.5f);
+        handleRt.anchoredPosition = Vector2.zero;
+        var handleImg = handleGo.AddComponent<Image>();
+        handleImg.sprite = white;
+        handleImg.color = new Color(0.98f, 0.82f, 0.45f, 1f);
+
+        var slider = sliderGo.AddComponent<Slider>();
+        slider.fillRect = fillRt;
+        slider.handleRect = handleRt;
+        slider.targetGraphic = handleImg;
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.minValue = 0f;
+        slider.maxValue = 1f;
+        slider.wholeNumbers = false;
+        return slider;
+    }
+
+    void SetupMenuMusicVolumeSlider()
+    {
+        var canvas = GetComponentInChildren<Canvas>(true);
+        if (canvas == null)
+            return;
+
+        var root = canvas.transform.Find("MenuMusicVolumeRoot");
+        Slider slider;
+        if (root == null)
+        {
+            slider = BuildMenuMusicVolumeSliderUi(canvas.transform, canvas.gameObject.layer, 1);
+            if (slider == null)
+                return;
+        }
+        else
+            slider = root.GetComponentInChildren<Slider>(true);
+
+        if (slider == null)
+            return;
+
+        slider.onValueChanged.RemoveListener(OnMenuMusicVolumeSliderChanged);
+        slider.value = menuMusicVolume;
+        slider.onValueChanged.AddListener(OnMenuMusicVolumeSliderChanged);
+    }
+
+    static Sprite UiWhiteSprite()
+    {
+        if (_cachedUiWhiteSprite != null)
+            return _cachedUiWhiteSprite;
+        var tex = Texture2D.whiteTexture;
+        _cachedUiWhiteSprite = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+        return _cachedUiWhiteSprite;
     }
 
     static Sprite LoadSprite(string assetPath, string resourcesName)
