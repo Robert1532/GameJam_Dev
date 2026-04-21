@@ -18,6 +18,10 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
     [SerializeField] float pressScale = 0.94f;
     [SerializeField] float smooth = 14f;
 
+    AudioSource _uiSfx;
+    AudioClip _hoverClip;
+    float _hoverVolume = 1f;
+
     RectTransform _rt;
     Text _label;
     Vector3 _baseScale;
@@ -69,7 +73,30 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
 
     static Color Brighten(Color c) => Color.Lerp(c, Color.white, 0.28f);
 
-    public void OnPointerEnter(PointerEventData eventData) => _hover = true;
+    /// <summary>
+    /// Asigna el origen 2D para <see cref="AudioSource.PlayOneShot"/> al entrar el puntero (hover).
+    /// </summary>
+    public void SetUiSfxSource(AudioSource uiSfx, AudioClip hoverClip, float volumeScale)
+    {
+        _uiSfx = uiSfx;
+        _hoverClip = hoverClip;
+        _hoverVolume = Mathf.Clamp01(volumeScale);
+    }
+
+    void PlayHoverSound()
+    {
+        if (_hoverClip == null || _uiSfx == null)
+            return;
+        if (_hoverClip.loadState == AudioDataLoadState.Unloaded)
+            _hoverClip.LoadAudioData();
+        _uiSfx.PlayOneShot(_hoverClip, _hoverVolume);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        _hover = true;
+        PlayHoverSound();
+    }
 
     public void OnPointerExit(PointerEventData eventData) => _hover = false;
 

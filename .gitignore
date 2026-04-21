@@ -2,6 +2,16 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+# --- Versionar en git para que un clone abra el proyecto bien ---
+#   Packages/manifest.json y packages-lock.json
+#   ProjectSettings/ (carpeta completa)
+#   Assets/ incluyendo cada *.meta junto a su asset (sin .meta Unity pierde GUIDs y referencias)
+#   Escenas .unity que uses (p. ej. Assets/00_Scenes/Edwin.unity + Edwin.unity.meta)
+# Menú LAST MACHINE (Edwin): Assets/01_Script/Edwin/ (runtime + Editor), Assets/05_Assets/Edwin/
+#   (sprites, Resources/* para builds si los usas).
+# No añadas reglas tipo "*.meta" o "Assets/**/*.meta": rompería el proyecto al clonar.
+# ---
+#
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
