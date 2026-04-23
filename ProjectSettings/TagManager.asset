@@ -21,6 +21,7 @@ TagManager:
   - PiezaSensor
   - "PiezaCa\xF1on"
   - Misil
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -28,7 +29,7 @@ TagManager:
   - PostProcessing
   - Water
   - UI
-  - 
+  - Turret
   - 
   - 
   - 
