@@ -1,0 +1,6 @@
+newmtl tripo_material_db772300_6505_4a9d_88f7_f810a71ba38d
+Kd 1.000000000 1.000000000 1.000000000
+d 1.000000000
+illum 2
+map_Kd curved+red+pipe+3d+model_basecolor.jpg
+
