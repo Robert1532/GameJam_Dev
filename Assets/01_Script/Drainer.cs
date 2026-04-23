@@ -8,6 +8,7 @@ public class Drainer : MonoBehaviour
     public string tagObjetivo = "Motor";
     public float velocidad = 2.5f;
     public Animator animator;
+    public GameObject PiezaCañonPrefab;
 
     public float vida = 70f;
     public float daño = 18f;
@@ -24,6 +25,12 @@ public class Drainer : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
 
         if (objetivoCercano != null)
@@ -57,6 +64,25 @@ public class Drainer : MonoBehaviour
                 animator.SetBool("IsAttack", false);
             }
         }
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        if (PiezaCañonPrefab != null)
+        {
+            Instantiate(PiezaCañonPrefab, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
     }
 
     GameObject BuscarObjetivoMasCercano()

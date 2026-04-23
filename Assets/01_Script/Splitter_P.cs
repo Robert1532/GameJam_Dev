@@ -25,11 +25,16 @@ public class Splitter_P : MonoBehaviour
     {
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 7f;
-        //StartCoroutine(SistemaDeDegradacion());
     }
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         if (estaSaltando) return;//
 
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
@@ -111,16 +116,6 @@ public class Splitter_P : MonoBehaviour
         agente.enabled = true;
         agente.Warp(transform.position);
     }
-
-    /*IEnumerator SistemaDeDegradacion()
-    {
-        while (vida > 0)
-        {
-            yield return new WaitForSeconds(intervaloDano);
-            vida -= 1;
-            if (vida <= 0) Morir();
-        }
-    }*/
 
     void Morir()
     {

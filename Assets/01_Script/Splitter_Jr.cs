@@ -10,6 +10,7 @@ public class Splitter_Jr : MonoBehaviour
     public float distanciaAlObjetivo = 0.5f;
     private float anguloPersonal;
     public Animator animator;
+    public GameObject PiezaCañonPrefab;
 
     public float alturaSalto = 4f;
     public float duracionSalto = 0.4f;
@@ -56,6 +57,12 @@ public class Splitter_Jr : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         if (agente == null || !agente.enabled || !agente.isOnNavMesh || estaSaltando)
             return;
 
@@ -91,6 +98,25 @@ public class Splitter_Jr : MonoBehaviour
                 animator.SetBool("IsAttack", false);
             }
         }
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        if (PiezaCañonPrefab != null)
+        {
+            Instantiate(PiezaCañonPrefab, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
     }
 
     IEnumerator SecuenciaDeSalto(Vector3 posObjetivo)

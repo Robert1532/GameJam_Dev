@@ -7,6 +7,7 @@ public class Rusher : MonoBehaviour
     public string tagObjetivo = "Torreta";
     public ParticleSystem efecto;
     public Animator animator;
+    public GameObject PiezaMotorPrefab;
 
     public float amplitud = 10f;
     public float frecuencia = 1.2f;
@@ -32,6 +33,12 @@ public class Rusher : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         if (agente == null || !agente.isOnNavMesh) return;
 
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
@@ -100,6 +107,26 @@ public class Rusher : MonoBehaviour
         }
     }
 
+    public void TomarDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        if (efecto != null) efecto.Stop();
+
+        if (PiezaMotorPrefab != null)
+        {
+            Instantiate(PiezaMotorPrefab, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
+    }
     void MirarSiempreObjetivo(Vector3 posicionObjetivo)
     {
         Vector3 direccion = (posicionObjetivo - transform.position).normalized;

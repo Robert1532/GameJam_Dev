@@ -6,6 +6,7 @@ public class Armored : MonoBehaviour
     private NavMeshAgent agente;
     public string tagObjetivo = "Torreta";
     public Animator animator;
+    public GameObject PiezaSensorPrefab;
 
     public float rangoAtaque = 1f;
     public float vida = 150f;
@@ -20,6 +21,12 @@ public class Armored : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
 
         if (objetivoCercano != null)
@@ -54,6 +61,25 @@ public class Armored : MonoBehaviour
                 animator.SetBool("IsAttack", false);
             }
         }
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        if (PiezaSensorPrefab != null)
+        {
+            Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
     }
 
     void GirarHaciaObjetivo(Vector3 destino)

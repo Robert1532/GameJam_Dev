@@ -8,6 +8,7 @@ public class Scrapper : MonoBehaviour
     private NavMeshAgent agente;
     public string tagObjetivo = "Cañon";
     public Animator animator;
+    public GameObject PiezaMotorPrefab;
 
     public float vida = 100f;
     public float daño = 12f;
@@ -20,6 +21,12 @@ public class Scrapper : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
 
         if (objetivoCercano != null && agente.isActiveAndEnabled && agente.isOnNavMesh)
@@ -51,6 +58,25 @@ public class Scrapper : MonoBehaviour
             animator.SetBool("IsWalk", false);
             animator.SetBool("IsAttack", false);
         }
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        if (PiezaMotorPrefab != null)
+        {
+            Instantiate(PiezaMotorPrefab, transform.position, transform.rotation);
+        }
+
+        Destroy(gameObject);
     }
 
     GameObject BuscarObjetivoMasCercano()

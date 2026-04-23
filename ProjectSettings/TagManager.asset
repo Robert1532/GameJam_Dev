@@ -17,11 +17,15 @@ TagManager:
   - SplitterH
   - Boss
   - Tunder
+  - PiezaMotor
+  - PiezaSensor
+  - "PiezaCa\xF1on"
+  - Misil
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PostProcessing
   - Water
   - UI
   - 
@@ -56,3 +60,4 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
+  - PostProcessing

@@ -10,6 +10,7 @@ public class Jammer : MonoBehaviour
     public Transform tunderPoint;
     private GameObject rayoInstanciado;
     public Animator animator;
+    public GameObject PiezaSensorPrefab;
 
     public float vida = 100f;
     public float daño = 7f;
@@ -22,6 +23,12 @@ public class Jammer : MonoBehaviour
 
     void Update()
     {
+        if (vida <= 0)
+        {
+            Morir();
+            return;
+        }
+
         GameObject objetivoCercano = BuscarObjetivoMasCercano();
 
         if (objetivoCercano != null)
@@ -52,6 +59,27 @@ public class Jammer : MonoBehaviour
             animator.SetBool("IsAttack", false);
             animator.SetBool("IsWalk", false);
         }
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        DesactivarRayo();
+
+        if (PiezaSensorPrefab != null)
+        {
+            Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
+        }
+
+        Destroy(gameObject);
     }
 
     void ActualizarRayo(Vector3 posicionObjetivo)
