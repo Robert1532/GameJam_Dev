@@ -6,6 +6,9 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace LastMachine.Arandia
 {
@@ -26,13 +29,9 @@ namespace LastMachine.Arandia
 
         // Estado
         private TurretController_Arandia currentTurret;
-        private List<TurretHUD_Arandia> allHUDs = new List<TurretHUD_Arandia>();
 
         void Start()
         {
-            // Auto-encontrar todos los HUDs de torreta en la escena
-            TurretHUD_Arandia[] huds = FindObjectsByType<TurretHUD_Arandia>(FindObjectsSortMode.None);
-            allHUDs.AddRange(huds);
 
             // Validar referencias
             if (repairSystem == null)
@@ -49,7 +48,13 @@ namespace LastMachine.Arandia
             // Recoger piezas con F (opcional, drop de enemigos lo hace automático)
             // Esta es la versión de emergencia para debug
 #if UNITY_EDITOR
-            if (Input.GetKeyDown(KeyCode.F))
+            bool fDown = false;
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null) fDown = Keyboard.current.fKey.wasPressedThisFrame;
+#else
+            fDown = Input.GetKeyDown(KeyCode.F);
+#endif
+            if (fDown)
                 inventory?.AddPieces(3);
 #endif
         }

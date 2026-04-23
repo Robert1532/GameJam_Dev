@@ -5,6 +5,9 @@
 
 using UnityEngine;
 using System.Collections;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace LastMachine.Arandia
 {
@@ -52,13 +55,31 @@ namespace LastMachine.Arandia
         {
             if (currentTurret == null || isRepairing) return;
 
-            if (Input.GetKey(KeyCode.E))
+            bool ePressed = false;
+            bool num1Down = false, num2Down = false, num3Down = false;
+
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1))
+                ePressed = Keyboard.current.eKey.isPressed;
+                num1Down = Keyboard.current.digit1Key.wasPressedThisFrame;
+                num2Down = Keyboard.current.digit2Key.wasPressedThisFrame;
+                num3Down = Keyboard.current.digit3Key.wasPressedThisFrame;
+            }
+#else
+            ePressed = Input.GetKey(KeyCode.E);
+            num1Down = Input.GetKeyDown(KeyCode.Alpha1);
+            num2Down = Input.GetKeyDown(KeyCode.Alpha2);
+            num3Down = Input.GetKeyDown(KeyCode.Alpha3);
+#endif
+
+            if (ePressed)
+            {
+                if (num1Down)
                     StartRepair(currentTurret.sensor, 0);
-                else if (Input.GetKeyDown(KeyCode.Alpha2))
+                else if (num2Down)
                     StartRepair(currentTurret.canon, 1);
-                else if (Input.GetKeyDown(KeyCode.Alpha3))
+                else if (num3Down)
                     StartRepair(currentTurret.motor, 2);
             }
         }
