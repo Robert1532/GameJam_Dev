@@ -453,9 +453,7 @@ PlayerSettings:
   m_BuildTargetVRSettings:
   - m_BuildTarget: Standalone
     m_Enabled: 0
-    m_Devices:
-    - Oculus
-    - OpenVR
+    m_Devices: []
   m_DefaultShaderChunkSizeInMB: 16
   m_DefaultShaderChunkCount: 0
   openGLRequireES31: 0
@@ -869,7 +867,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 2308a575-b928-45c4-bfe9-eb8bb1dad8fe
   framebufferDepthMemorylessMode: 0
