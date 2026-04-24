@@ -14,7 +14,7 @@ namespace LastMachine.Arandia
     public class GameManager_Arandia : MonoBehaviour
     {
         [Header("Torretas - Arandia")]
-        public TurretController_Arandia[] turrets;  // Las 4 torretas
+        public System.Collections.Generic.List<TurretController_Arandia> turrets = new System.Collections.Generic.List<TurretController_Arandia>();
 
         [Header("Referencia al WaveManager")]
         public WaveManager_Arandia waveManager;
