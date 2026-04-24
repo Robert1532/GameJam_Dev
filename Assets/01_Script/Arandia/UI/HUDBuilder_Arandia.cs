@@ -33,13 +33,16 @@ namespace LastMachine.Arandia
         }
 
         // Colores del tema LAST MACHINE (Pixel-Art Retro de Guerra)
-        private Color bgDark      = new Color(0.05f, 0.07f, 0.1f, 0.95f);
-        private Color borderBlue  = new Color(0.15f, 0.5f, 0.9f, 1f);
-        private Color greenOK     = new Color(0f, 1f, 0.4f, 1f);
+        private Color bgDark      = new Color(0.05f, 0.08f, 0.12f, 0.98f);
+        private Color borderBlue  = new Color(0f, 0.8f, 1f, 1f); // Cian Neón
+        private Color greenOK     = new Color(0.2f, 1f, 0.8f, 1f);
         private Color orangeWarn  = new Color(1f, 0.6f, 0f, 1f);
-        private Color redBad      = new Color(1f, 0.1f, 0.2f, 1f);
-        private Color textWhite   = new Color(0.95f, 1f, 0.95f);
-        private Color textGray    = new Color(0.54f, 0.55f, 0.57f);
+        private Color redBad      = new Color(1f, 0.2f, 0.2f, 1f);
+        private Color textWhite   = new Color(0.9f, 0.95f, 1f, 1f);
+        private Color textGray    = new Color(0.6f, 0.7f, 0.8f);
+
+        [Header("Estética Personalizada")]
+        public Sprite panelBackground;
 
         // Referencias generadas
         private Canvas canvas;
@@ -203,6 +206,15 @@ namespace LastMachine.Arandia
             RectTransform rt = turretPanel.GetComponent<RectTransform>();
             rt.pivot = new Vector2(0, 0.5f);
             
+            // Si hay fondo personalizado, usarlo
+            if (panelBackground != null)
+            {
+                Image img = turretPanel.GetComponent<Image>();
+                img.sprite = panelBackground;
+                img.type = Image.Type.Simple;
+                img.color = Color.white;
+            }
+            
             AddOutline(turretPanel, borderBlue, 4);
             turretNameLabel = CreateText(turretPanel.transform, "Title", new Vector2(25, -20), new Vector2(400, 40), "SISTEMA DE MANTENIMIENTO", 18, textWhite, FontStyles.Bold);
             
@@ -213,7 +225,7 @@ namespace LastMachine.Arandia
             for (int i = 0; i < 3; i++)
             {
                 int index = i;
-                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(410, 95), new Color(0.12f, 0.18f, 0.25f));
+                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(410, 95), new Color(0.1f, 0.15f, 0.2f, 0.4f));
                 RectTransform boxRT = box.GetComponent<RectTransform>();
                 boxRT.pivot = new Vector2(0, 1);
                 

@@ -210,6 +210,7 @@ MonoBehaviour:
   firePoint: {fileID: 6797286016796290888}
   canonRotationSpeed: 90
   sensorIdleSpeed: 45
+  rotationOffset: {x: 0, y: 180, z: 0}
   recoilDistance: 0.15
   recoilDuration: 0.08
   recoilReturnDuration: 0.2
@@ -802,7 +803,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 273265fd105e46d42979e0fc0d9f078c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.TurretController_Arandia
-  direction: 0
+  direction: 1
   sensor: {fileID: 220871606264961613}
   canon: {fileID: 377888954812610545}
   motor: {fileID: 6024473982418293760}
@@ -811,7 +812,7 @@ MonoBehaviour:
   baseDamage: 10
   projectilePrefab: {fileID: 49080257379008806, guid: b491efe6873f0054289e1521692f43aa, type: 3}
   firePoint: {fileID: 6797286016796290888}
-  turretAnimator: {fileID: 0}
+  turretAnimator: {fileID: 6442194805542653616}
   playerInRange: 0
 --- !u!114 &7032022916675018134
 MonoBehaviour:
@@ -847,6 +848,7 @@ MonoBehaviour:
   firePoint: {fileID: 6797286016796290888}
   canonRotationSpeed: 90
   sensorIdleSpeed: 45
+  rotationOffset: {x: 0, y: 180, z: 0}
   recoilDistance: 0.15
   recoilDuration: 0.08
   recoilReturnDuration: 0.2

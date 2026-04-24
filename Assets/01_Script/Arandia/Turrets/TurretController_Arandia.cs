@@ -52,6 +52,15 @@ namespace LastMachine.Arandia
 
         void Start()
         {
+            // Registrarse en el HUD automaticamente si no estamos en la lista
+            if (HUDBuilder_Arandia.Instance != null)
+            {
+                if (!HUDBuilder_Arandia.Instance.turrets.Contains(this))
+                {
+                    HUDBuilder_Arandia.Instance.turrets.Add(this);
+                    Debug.Log($"<color=green>[Auto-Registro] {turretName} se ha unido al HUD Manager</color>");
+                }
+            }
             // FORZAR QUE NINGUNA PIEZA SE MUEVA POR FISICAS (incluyendo hijos)
             Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
             foreach (Rigidbody rb in rbs)
