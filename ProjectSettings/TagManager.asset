@@ -23,6 +23,7 @@ TagManager:
   - "PiezaCa\xF1on"
   - Misil
   - Enemy
+  - Turret
   layers:
   - Default
   - TransparentFX
@@ -31,7 +32,7 @@ TagManager:
   - Water
   - UI
   - Turret
-  - 
+  - Enemy
   - Turret
   - 
   - 

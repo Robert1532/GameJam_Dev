@@ -73,15 +73,39 @@ namespace LastMachine.Arandia
             if (!isActive) return;
 
             CleanEnemyList();
-            UpdateTarget();
-            HandleFiring();
-            HandleAiming();
-        }
 
-        private void HandleAiming()
-        {
-            if (turretAnimator == null || currentTarget == null) return;
-            turretAnimator.AimAt(currentTarget.position);
+            // LÓGICA DEL SENSOR (APUNTADO)
+            if (!sensor.IsBroken)
+            {
+                UpdateTarget();
+                if (currentTarget != null && turretAnimator != null)
+                {
+                    turretAnimator.AimAt(currentTarget.position);
+                }
+            }
+            else
+            {
+                // FALLO DEL SENSOR: Apuntado errático aleatorio
+                if (turretAnimator != null)
+                {
+                    Vector3 randomPos = transform.position + transform.forward * 10f + transform.right * Mathf.Sin(Time.time * 2f) * 5f;
+                    turretAnimator.AimAt(randomPos);
+                }
+            }
+
+            // LÓGICA DEL MOTOR Y CAÑÓN (DISPARO)
+            if (!canon.IsBroken)
+            {
+                float fireRate = baseFireRate;
+                if (motor.IsBroken) fireRate *= 0.2f; // Motor roto = 20% cadencia
+
+                fireTimer += Time.deltaTime;
+                if (fireTimer >= 1f / fireRate && currentTarget != null)
+                {
+                    Fire();
+                    fireTimer = 0;
+                }
+            }
         }
 
         private void SubscribeToComponents()
@@ -93,28 +117,27 @@ namespace LastMachine.Arandia
 
         private void UpdateTarget()
         {
-            if (sensor.IsBroken)
-            {
-                // Sensor roto: dispara en direccion aleatoria
-                if (enemiesInRange.Count > 0)
-                    currentTarget = enemiesInRange[Random.Range(0, enemiesInRange.Count)];
-                return;
-            }
+            if (sensor.IsBroken) return;
+            if (detectionRange <= 0) detectionRange = 30f; // Forzar rango si está en 0
 
-            // Sensor OK: apunta al enemigo mas cercano
             float closestDist = float.MaxValue;
             currentTarget = null;
 
-            foreach (Transform enemy in enemiesInRange)
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange);
+            foreach (var hit in hitColliders)
             {
-                if (enemy == null) continue;
-                float dist = Vector3.Distance(transform.position, enemy.position);
-                if (dist < closestDist)
+                if (hit.CompareTag("Enemy"))
                 {
-                    closestDist = dist;
-                    currentTarget = enemy;
+                    float dist = Vector3.Distance(transform.position, hit.transform.position);
+                    if (dist < closestDist)
+                    {
+                        closestDist = dist;
+                        currentTarget = hit.transform;
+                    }
                 }
             }
+            
+            if (currentTarget != null) Debug.Log($"[Radar] {turretName} ha fijado objetivo: {currentTarget.name}");
         }
 
         private void Fire()

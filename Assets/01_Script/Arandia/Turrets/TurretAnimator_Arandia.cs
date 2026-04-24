@@ -167,17 +167,30 @@ namespace LastMachine.Arandia
         /// <summary>
         /// Llamar desde TurretController cada frame que tenga objetivo.
         /// </summary>
-        public void AimAt(Vector3 worldTarget)
-        {
-            if (canonPivot == null || canonComp == null) return;
-            if (canonComp.IsBroken) return;
+        private Vector3 currentAimTarget;
+        private bool hasTarget = false;
 
-            Vector3 direction = (worldTarget - canonPivot.position).normalized;
+        public void AimAt(Vector3 targetPos)
+        {
+            currentAimTarget = targetPos;
+            hasTarget = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!hasTarget || canonPivot == null) return;
+            if (canonComp != null && canonComp.IsBroken) return;
+
+            // Calcular dirección
+            Vector3 direction = (currentAimTarget - canonPivot.position).normalized;
             if (direction == Vector3.zero) return;
 
+            // Rotación forzada después de las animaciones
             Quaternion targetRot = Quaternion.LookRotation(direction);
-            float speed = canonComp.IsDamaged ? canonRotationSpeed * 0.5f : canonRotationSpeed;
-            canonPivot.rotation = Quaternion.RotateTowards(canonPivot.rotation, targetRot, speed * Time.deltaTime);
+            canonPivot.rotation = Quaternion.Slerp(canonPivot.rotation, targetRot, Time.deltaTime * canonRotationSpeed * 5f);
+            
+            // Resetear para el siguiente frame
+            hasTarget = false;
         }
 
         // ──────────────────────────────────────────────
