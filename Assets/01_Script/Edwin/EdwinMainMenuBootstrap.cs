@@ -19,8 +19,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     const string BgAssetPath = "Assets/05_Assets/Edwin/Backgrounds/bg_preview.png";
     const string BtnAssetPath = "Assets/05_Assets/Edwin/UI/button_start-preview.png";
     const string TitleAssetPath = "Assets/05_Assets/Edwin/UI/title-preview.png";
-    const string MenuMusicAssetPath =
-        "Assets/05_Assets/Edwin/Audio/Music/monume-retro-arcade-game-music/monume-retro-arcade-game-music-509489.mp3";
+    const string MenuMusicAssetPath = "Assets/05_Assets/Edwin/Audio/Music/LAST MACHINE - Main Menu.mp3";
     const string StartClickAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-click.mp3";
     const string StartHoverAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-hover.wav";
 
