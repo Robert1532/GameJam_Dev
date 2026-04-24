@@ -50,8 +50,12 @@ namespace LastMachine.Arandia
 
         // Estado interno
         private Vector3 canonLocalOrigin;
+        private Vector3 sensorLocalOrigin;
+        private Quaternion sensorLocalRotationOrigin;
+        private Vector3 motorLocalOrigin;
+
         private bool isDoingRecoil = false;
-        private Coroutine blinkCoroutine;
+        private Coroutine[] blinkCoroutines = new Coroutine[3];
 
         void Awake()
         {
@@ -60,8 +64,18 @@ namespace LastMachine.Arandia
             canonComp  = turret?.canon;
             motorComp  = turret?.motor;
 
+            // GUARDAR POSICIONES ORIGINALES DEL EDITOR
             if (canonPivot != null)
                 canonLocalOrigin = canonPivot.localPosition;
+            
+            if (sensorPivot != null)
+            {
+                sensorLocalOrigin = sensorPivot.localPosition;
+                sensorLocalRotationOrigin = sensorPivot.localRotation;
+            }
+
+            if (motorPivot != null)
+                motorLocalOrigin = motorPivot.localPosition;
         }
 
         void Start()
@@ -91,6 +105,20 @@ namespace LastMachine.Arandia
         {
             AnimateSensor();
             AnimateMotor();
+            HandleIdleBreathing();
+        }
+
+        private void HandleIdleBreathing()
+        {
+            if (canonPivot == null || turret.PlayerInRange) return; // No respirar si el jugador está operando o no hay pivote
+
+            // Si no hay un objetivo actual, el cañón oscila levemente
+            // Usamos un pequeño offset en el eje X para simular respiración
+            float breathe = Mathf.Sin(Time.time * 1.5f) * 2f; 
+            Quaternion breatheRot = Quaternion.Euler(breathe, 0f, 0f);
+            
+            // Solo aplicamos si no estamos apuntando (esto se pisa en AimAt si hay objetivo)
+            canonPivot.localRotation = Quaternion.Slerp(canonPivot.localRotation, breatheRot, Time.deltaTime * 1f);
         }
 
         // ──────────────────────────────────────────────
@@ -103,9 +131,9 @@ namespace LastMachine.Arandia
 
             if (sensorComp.IsBroken)
             {
-                // Sensor roto: oscila erráticamente
+                // Sensor roto: oscila erráticamente sobre su rotación original
                 float jitter = Mathf.Sin(Time.time * 8f) * 15f;
-                sensorPivot.localRotation = Quaternion.Euler(0f, jitter, 0f);
+                sensorPivot.localRotation = sensorLocalRotationOrigin * Quaternion.Euler(0f, jitter, 0f);
             }
             else
             {
@@ -121,14 +149,14 @@ namespace LastMachine.Arandia
 
             if (motorComp.IsDamaged && !motorComp.IsBroken)
             {
-                // Motor dañado: vibración leve
-                float vibX = Mathf.Sin(Time.time * 20f) * 0.02f;
-                float vibZ = Mathf.Cos(Time.time * 17f) * 0.02f;
-                motorPivot.localPosition = new Vector3(vibX, 0f, vibZ);
+                // Motor dañado: vibración sobre su posición original
+                float vibX = Mathf.Sin(Time.time * 20f) * 0.05f; // Un poco más de vibración
+                float vibZ = Mathf.Cos(Time.time * 17f) * 0.05f;
+                motorPivot.localPosition = motorLocalOrigin + new Vector3(vibX, 0f, vibZ);
             }
             else
             {
-                motorPivot.localPosition = Vector3.zero;
+                motorPivot.localPosition = motorLocalOrigin;
             }
         }
 
@@ -204,22 +232,28 @@ namespace LastMachine.Arandia
 
         private void OnComponentBroken(TurretComponent_Arandia comp)
         {
-            // Parpadeo rojo continuo hasta que se repare
+            int index = GetIndexForComponent(comp);
+            if (index == -1) return;
+
             Renderer r = GetRendererForComponent(comp);
             if (r != null)
             {
-                if (blinkCoroutine != null) StopCoroutine(blinkCoroutine);
-                blinkCoroutine = StartCoroutine(BlinkRed(r));
+                if (blinkCoroutines[index] != null) StopCoroutine(blinkCoroutines[index]);
+                blinkCoroutines[index] = StartCoroutine(BlinkRed(r));
             }
         }
 
         private void OnComponentRepaired(TurretComponent_Arandia comp)
         {
-            if (blinkCoroutine != null)
+            int index = GetIndexForComponent(comp);
+            if (index == -1) return;
+
+            if (blinkCoroutines[index] != null)
             {
-                StopCoroutine(blinkCoroutine);
-                blinkCoroutine = null;
+                StopCoroutine(blinkCoroutines[index]);
+                blinkCoroutines[index] = null;
             }
+
             // Restaurar color original
             Renderer r = GetRendererForComponent(comp);
             if (r != null)
@@ -248,18 +282,21 @@ namespace LastMachine.Arandia
             }
         }
 
-        private Renderer GetRendererForComponent(TurretComponent_Arandia comp)
+        private int GetIndexForComponent(TurretComponent_Arandia comp)
         {
-            if (comp == null || componentRenderers == null) return null;
-
-            int index = -1;
+            if (comp == null) return -1;
             switch (comp.componentType)
             {
-                case ComponentType.Sensor: index = 0; break;
-                case ComponentType.Canon:  index = 1; break;
-                case ComponentType.Motor:  index = 2; break;
+                case ComponentType.Sensor: return 0;
+                case ComponentType.Canon:  return 1;
+                case ComponentType.Motor:  return 2;
+                default: return -1;
             }
+        }
 
+        private Renderer GetRendererForComponent(TurretComponent_Arandia comp)
+        {
+            int index = GetIndexForComponent(comp);
             if (index >= 0 && index < componentRenderers.Length)
                 return componentRenderers[index];
 

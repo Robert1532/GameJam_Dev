@@ -154,6 +154,8 @@ namespace LastMachine.Arandia
 
             while (truceTimer > 0f)
             {
+                if (gameManager != null && gameManager.IsGameOver) yield break;
+                
                 truceTimer -= Time.deltaTime;
                 ShowStatus($"TREGUA — Repara tus torretas ({Mathf.CeilToInt(truceTimer)}s)");
                 yield return null;

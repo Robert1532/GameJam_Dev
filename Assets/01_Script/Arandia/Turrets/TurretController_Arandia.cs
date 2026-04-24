@@ -52,6 +52,16 @@ namespace LastMachine.Arandia
 
         void Start()
         {
+            // FORZAR QUE NINGUNA PIEZA SE MUEVA POR FISICAS (incluyendo hijos)
+            Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
+            foreach (Rigidbody rb in rbs)
+            {
+                rb.isKinematic = true;
+                rb.useGravity = false;
+            }
+
+            Debug.Log($"[Arandia] {turretName} bloqueada físicamente en: {transform.position}");
+
             SubscribeToComponents();
             // Auto-buscar animador si no está asignado
             if (turretAnimator == null)
