@@ -1,204 +1,5 @@
 # Proyecto revisión y familiarización
-_Exported on 21/4/2026 at 2:50:09 GMT-4 from Cursor (3.0.12)_
-
----
-
-**User**
-
-Revisa el proyecto para familiarizarte.
-
----
-
-**Cursor**
-
-Explorando la estructura del proyecto Unity/VR para ofrecer una visión clara del repositorio.
-
-
-
-Resumiendo hallazgos y creando un plan breve de orientación del repositorio.
-
-
-
----
-
-**User**
-
-Implement the plan as specified, it is attached for your reference. Do NOT edit the plan file itself.
-
-To-do's from the plan have already been created. Do not create them again. Mark them as in_progress as you work, starting with the first one. Don't stop until you have completed all the to-dos.
-
----
-
-**Cursor**
-
-Implementando los tres ítems del plan: XR (Plugin Management + OpenXR), escenas en Build Settings y scripts mínimos en `01_Script` referenciados desde la escena principal. Investigando versiones de paquetes y la estructura de assets XR en Unity 6.
-
-
-
-Añadiendo paquetes XR y generando la configuración. Comprobando si Unity está disponible para validar la resolución de paquetes; si no, crearemos los assets XR manualmente a partir de plantillas conocidas.
-
-
-
----
-
-**User**
-
-Unity esta instalado en el disco D.
-D:\Program Files\Unity\Hub\Editor\6000.3.3f1
-
----
-
-**Cursor**
-
-Continuando la implementación usando Unity en `D:\Program Files\Unity\Hub\Editor\6000.3.3f1`. Comprobando el estado del proyecto y completando los pendientes.
-
-
-
-Implementando XR, Build Settings y scripts. Añadiendo paquetes y un script de editor ejecutable en batchmode para configurar OpenXR; luego ejecutamos Unity desde la ruta que indicaste.
-
-
-
-Ejecutando Unity para resolver paquetes y leyendo la API del paquete XR en PackageCache.
-
-
-
-Creando el script de editor, ejecutándolo en batchmode y completando build settings, scripts y limpieza del VR legacy.
-
-
-
-Creando archivos y ejecutando el bootstrap.
-
-
-
-Usé Unity en **`D:\Program Files\Unity\Hub\Editor\6000.3.3f1\Editor\Unity.exe`** con `-executeMethod GameJamXRBootstrap.ConfigureOpenXR` y terminó bien (log: *OpenXR loader assigned for Standalone and Android*). Los tres to-dos del plan quedan hechos.
-
-### 1. XR (OpenXR + VR legacy)
-- En [`Packages/manifest.json`](Packages/manifest.json): `com.unity.xr.management` **4.5.4** y `com.unity.xr.openxr` **1.16.1**.
-- [`Assets/01_Script/Editor/GameJamXRBootstrap.cs`](Assets/01_Script/Editor/GameJamXRBootstrap.cs): asigna el loader **OpenXR** para **Standalone** y **Android**; menú **`GameJam/XR/Configure OpenXR`** por si hace falta repetirlo en el editor.
-- Assets generados y versionables bajo **`Assets/XR/`** (`XRGeneralSettingsPerBuildTarget`, `Loaders/OpenXRLoader`, `Settings/OpenXRPackageSettings`) y entradas en [`ProjectSettings/EditorBuildSettings.asset`](ProjectSettings/EditorBuildSettings.asset) para `loader_settings` y `openxr.settings4`.
-- En [`ProjectSettings/ProjectSettings.asset`](ProjectSettings/ProjectSettings.asset): lista legacy `m_Devices` vacía (VR legacy sigue **desactivado** con `m_Enabled: 0`).
-
-### 2. Build Settings
-- Las cuatro escenas están en **Scenes In Build** (primero `Main`), en [`ProjectSettings/EditorBuildSettings.asset`](ProjectSettings/EditorBuildSettings.asset).
-
-### 3. Código + escena principal
-- [`Assets/01_Script/GameJamSessionRoot.cs`](Assets/01_Script/GameJamSessionRoot.cs): componente mínimo de arranque.
-- En [`Assets/00_Scenes/Main.unity`](Assets/00_Scenes/Main.unity): objeto **`GameSystems`** con ese componente.
-
-Rutas útiles para volver a ejecutar solo XR en batchmode:
-
-`& "D:\Program Files\Unity\Hub\Editor\6000.3.3f1\Editor\Unity.exe" -batchmode -nographics -quit -projectPath "d:\VR\GameJam_Dev" -executeMethod GameJamXRBootstrap.ConfigureOpenXR`
-
-Borré los logs temporales `unity-resolve.log` y `unity-xr-bootstrap.log` en la raíz del proyecto para no ensuciar el repo.
-
----
-
-**User**
-
-Ahora mi escena asignada a mi como desarrollador es Edwin.unity, todo lo que haga debe estar en Edwin.unity. Las otras carpetas 01_, 02_, 03_, 04_, 05_, etc. puedo utilizar con normalidad, pero tienen que estar en una carpeta llamada "edwin" o "Edwin".
-
----
-
-**Cursor**
-
-Revisando la escena `Edwin.unity` y la estructura actual de carpetas para proponer una convención clara.
-
-
-
-Confirmando: `Edwin.unity` ya contiene objetos (p. ej. cámara/luz). Proponiendo convención de carpetas y qué tocar en la escena.
-
-
-
-Una decisión de diseño: dos formas válidas de cumplir “todo bajo Edwin”. Recomendamos una y mencionamos la alternativa en el plan.
-
-
-
----
-
-**User**
-
-mas bien 01_Script, 02_Model, 03_Prefabs, 04_Animation, 05_Assets etc y dentro una carpeta Edwin y dentro de la carpeta Edwin si van los scripts, y si estoy en 03_Prefabs/Edwin aqui si van mis prefabs normal.
-
-Como somos 4 desarrolldores para que no se mezcle todo y que de cada desarrollador se mantenga intacto su implementacion, en adelante en todo el proyecto eso se va a mantener, si me tocara una tarea que uno de mis colegaas ya haya hecho, yo Edwin desde mi 01_Script/Edwin y dentro mis scripts puedo referenciar normal a sus funciones o metodos que haya implementado mi colega sin modificarselo su codigo, solo modifico en el mio.
-
----
-
-**Cursor**
-
-Actualizando el plan: estructura `01_Script/Edwin/`, … y reglas de colaboración entre los cuatro desarrolladores.
-
-
-
-Actualizando el documento del plan: la convención oficial pasa a ser `01_Script/Edwin/`, etc., y añadimos las reglas para los cuatro desarrolladores.
-
-
-
-Listo: **actualicé el plan** para que la convención oficial sea exactamente la que comentas:
-
-- **`Assets/01_Script/Edwin/`** → tus scripts; **`Assets/03_Prefabs/Edwin/`** → tus prefabs; y lo mismo con **`02_Model/Edwin`**, **`04_Animation/Edwin`**, **`05_Assets/Edwin`**, etc.
-- **Cuatro desarrolladores**: el mismo patrón con el nombre de cada uno (`Alex`, `Robert`, `Edwin`, y el cuarto según acuerden con su escena).
-- **Separación**: cada uno mantiene intacto lo suyo en `NN_Categoria/<Nombre>/` y en su escena (`Edwin.unity`, etc.).
-- **Integración**: desde tu `01_Script/Edwin/` puedes **usar y referenciar** APIs públicas de un compañero **sin tocar** sus archivos ni su carpeta; los cambios van solo en lo tuyo.
-- La idea anterior **`Assets/Edwin/01_Script/`** queda **descartada** en el plan.
-
-Los to-dos del plan pasan a reflejar crear esas carpetas por dev, escena solo `Edwin.unity`, infra global fuera de carpetas por persona, y la regla **reference-only** entre devs.
-
-Cuando quieras que esto se **aplique en el proyecto** (crear carpetas `.meta`, etc.), dímelo explícitamente (por ejemplo “implementa el plan” o “ejecútalo”).
-
----
-
-**User**
-
-Implement the plan as specified, it is attached for your reference. Do NOT edit the plan file itself.
-
-To-do's from the plan have already been created. Do not create them again. Mark them as in_progress as you work, starting with the first one. Don't stop until you have completed all the to-dos.
-
----
-
-**Cursor**
-
-Implementando la estructura de carpetas por desarrollador, la carpeta `Common` para código compartido y el objeto raíz en `Edwin.unity`. Marcando el primer todo como en progreso.
-
-
-
-Creando la estructura de carpetas con metas únicas, moviendo `GameJamSessionRoot` a `01_Script/Common` y actualizando `Edwin.unity` con `Edwin_Root`.
-
-
-
-Creando carpetas y archivos `.meta` con la herramienta Write: el operador `-f` de PowerShell chocaba con las llaves `{}` del YAML.
-
-
-
-Escribiendo los `.meta` de las carpetas en `02_Model`–`05_Assets` y moviendo `GameJamSessionRoot` a `Common`.
-
-
-
-Moviendo `GameJamSessionRoot` a `Common` y actualizando `Edwin.unity`.
-
-
-
-Resumen de lo implementado:
-
-### Carpetas por desarrollador (`mkdir-dev-folders`)
-Bajo cada categoría existen **`Edwin`**, **`Alex`**, **`Robert`** y **`Main`** con su `.meta`:
-
-- `Assets/01_Script/` → `Common/`, `Edwin/`, `Alex/`, `Robert/`, `Main/`
-- `Assets/02_Model/`, `03_Prefabs/`, `04_Animation/`, `05_Assets/` → mismos cuatro nombres en cada una
-
-### Código compartido (`shared-vs-local`)
-- [`GameJamSessionRoot.cs`](Assets/01_Script/Common/GameJamSessionRoot.cs) pasó a **`Assets/01_Script/Common/`** (mismo **GUID** `a4e8f6c2d0b1487e9f3a2b1c5d7e8f00`), así [`Main.unity`](Assets/00_Scenes/Main.unity) sigue enlazando bien a `GameSystems`.
-- [`Assets/01_Script/Common.meta`](Assets/01_Script/Common.meta) define la carpeta **Common** para código acordado por el equipo.
-- **`Editor/`** y **`XR/`** siguen donde estaban (infra global).
-
-### Escena Edwin (`scene-edwin-only`)
-- En [`Edwin.unity`](Assets/00_Scenes/Edwin.unity): **`Edwin_Root`** con la luz y la cámara como hijos; **`SceneRoots`** solo lista ese transform raíz.
-
-### Colaboración (`team-reference-only`)
-- Texto breve en [`Assets/MULTI_DEV_LAYOUT.txt`](Assets/MULTI_DEV_LAYOUT.txt) + [`MULTI_DEV_LAYOUT.txt.meta`](Assets/MULTI_DEV_LAYOUT.txt.meta) con la regla de no tocar la carpeta del otro e integrar por API pública.
-
-El todo antiguo **`mkdir-edwin-tree`** (árbol `Assets/Edwin/01_Script`) quedó **cancelado** porque el plan vigente usa `01_Script/Edwin/`, etc.
-
-Al abrir el proyecto en Unity, si regenera algún `.meta`, revisa que no haya duplicados; las GUIDs de las carpetas `02_`–`05_` están asignadas de forma secuencial y no deberían chocar con las de `01_Script`.
+_Exported on 24/4/2026 at 10:20:34 GMT-4 from Cursor (3.0.12)_
 
 ---
 
@@ -2194,4 +1995,300 @@ Resumen de lo implementado:
 - **`button-start-hover.wav.meta`**: **2D**, **preload**, **normalize** desactivada (como el resto de UI).
 
 Puedes ajustar **`startHoverVolume`** y **`startClickVolume`** en el Inspector del `MainMenu_Root`. Si entras y sales del botón muy rápido, el hover puede dispararse varias veces (comportamiento normal de `OnPointerEnter`).
+
+---
+
+**User**
+
+La musica del menu va a ser esta Assets/05_Assets/Edwin/Audio/Music/LAST MACHINE - Main Menu.mp3
+
+---
+
+**Cursor**
+
+Actualizando la ruta de la música del menú, la referencia en la escena y la copia en `Resources`; ajustando el import del MP3 para reproducción 2D en menú.
+
+
+
+Listo. La música del menú apunta a **`LAST MACHINE - Main Menu.mp3`**.
+
+## Cambios
+- **`EdwinMainMenuBootstrap.cs`** y **`EdwinMainMenuSceneBuilder.cs`**: `MenuMusicAssetPath` → `Assets/05_Assets/Edwin/Audio/Music/LAST MACHINE - Main Menu.mp3`
+- **`Edwin.unity`**: `menuBackgroundMusic` → GUID **`dbffcabf7a4ac2544acaf753c145927d`**
+- **`Resources/Audio/EdwinMenuMusic.mp3`**: sustituido por el mismo archivo (sigue cargándose con `Resources.Load("Audio/EdwinMenuMusic")` en build)
+- **`LAST MACHINE - Main Menu.mp3.meta`**: **3D: 0**, **normalize: 0**, **loadInBackground: 1** (menú 2D y carga en segundo plano)
+- **`EdwinMenuMusic.mp3.meta`**: **normalize: 0** y **loadInBackground: 1** alineados con el tema nuevo
+
+El tema anterior **`monume-retro-arcade-game-music-509489.mp3`** sigue en el proyecto por si lo quieres en otra escena. Si usas **`Assets/_Recovery/0 (1).unity`**, ahí sigue la referencia antigua; dímelo si quieres actualizarla también.
+
+---
+
+**User**
+
+En Assets/00_Scenes/Edwin.unity
+
+vamos a reemplazar por esta imagen Assets/05_Assets/Edwin/Backgrounds/bg_2_preview.png
+
+---
+
+**Cursor**
+
+Actualizando la escena, las rutas en código y el import de `bg_2_preview.png` (debe ser Sprite 2D como el fondo anterior).
+
+
+
+Listo. Resumen:
+
+## `Edwin.unity`
+- El **Image** del objeto **`Background`** (`1681096480`) usa ahora el sprite **`8fc5dbb8c5ba4e74fa385519d634282a`** (`bg_2_preview.png`).
+
+## Código
+- **`EdwinMainMenuBootstrap`**: `BgAssetPath` → `bg_2_preview.png`; en build, `Resources.Load<Sprite>("bg_2_preview")`.
+- **`EdwinMainMenuSceneBuilder`**: `BgPath` → la misma ruta (menú horneado).
+
+## Import de `bg_2_preview.png`
+En **`bg_2_preview.png.meta`** quedó alineado con el fondo anterior: **Sprite (2D and UI)**, `spriteMode: 1`, **sin mipmaps**, **`alphaIsTransparency: 1`**, **`nPOTScale: 0`**. Así Unity lo trata como sprite de UI.
+
+## `Resources` (builds)
+- **`Resources/bg_2_preview.png`** (+ **`.meta`** con GUID propio) copia del mismo arte.
+
+No toqué **`TitleImage`** ni otros sprites; solo el **Background** del menú y las rutas de carga. Si Unity no refresca solo, **Reimport** `bg_2_preview.png` en `Backgrounds`.
+
+---
+
+**User**
+
+Las fuentes que voy a utilizar donde deberian estar, en que carpeta los agrego??
+
+---
+
+**Cursor**
+
+En Unity no hay una carpeta obligatoria; lo importante es **una sola convención en el equipo** y que las fuentes **no queden fuera de `Assets/`**.
+
+## Recomendación para tu repo (multi‑dev)
+
+Por tu regla **`NN_Categoria/<Nombre>/`**, lo más coherente es:
+
+- **Solo las usas tú (Edwin):**  
+  `Assets/05_Assets/Edwin/Fonts/`  
+  (o `Assets/05_Assets/Edwin/UI/Fonts/` si prefieres agruparlas con la UI)
+
+- **Las comparten varios:**  
+  `Assets/05_Assets/Common/Fonts/`  
+  (o `Assets/Fonts/` si el equipo acuerda un sitio global fuera de carpetas por dev)
+
+Ahí metes los **`.ttf` / `.otf`**. Unity los importa como **Font**; en el Inspector del **Text** o **TMP** eliges ese asset.
+
+## TextMesh Pro vs UI clásica
+
+- **TextMesh Pro:** muchos proyectos dejan fuentes bajo `Assets/TextMesh Pro/Fonts/` o una carpeta propia y crean **Font Assets** (`.asset`) donde quieras, p. ej. `05_Assets/Edwin/Fonts/TMP/`.
+- **UI `Text` (Legacy)** como en tu menú Edwin: basta con referenciar el **`.ttf`/`.otf`** en el componente (o cargar desde **Resources** si lo haces por código).
+
+## `Resources`
+
+Solo hace falta **`Assets/.../Resources/...`** si vas a cargar la fuente con `Resources.Load`. Si la asignas en la escena o en un prefab, **no** hace falta duplicarla en `Resources`.
+
+En resumen: para Edwin, **`Assets/05_Assets/Edwin/Fonts/`** es un sitio claro y alineado con el layout del proyecto.
+
+---
+
+**User**
+
+La fuente para el titulo LAST MACHINE 
+vamos a utilizar esta fuente Assets/05_Assets/Edwin/Fonts/OFL.txt, Assets/05_Assets/Edwin/Fonts/RussoOne-Regular.ttf
+
+---
+
+**Cursor**
+
+Integrando **Russo One** para los textos del título (LAST / MACHINE). `OFL.txt` es la licencia; no se asigna a la UI. Comprobando archivos y referencias en escena y código.
+
+
+
+Implementando: `OFL.txt` es solo la licencia (OFL); la fuente usable es `RussoOne-Regular.ttf`. Añadiendo resolución de fuente, actualizando `AddTitleBlock`, la escena y `Resources` para builds.
+
+
+
+Aplicando cambios en código, escena, scene builder y copia en `Resources`.
+
+
+
+Esto es lo que quedó hecho:
+
+## Russo One para LAST / MACHINE
+- **`OFL.txt`**: es la **licencia** (SIL Open Font License); no se asigna a la UI. Déjalo en `Fonts/` como documentación.
+- **`RussoOne-Regular.ttf`**: es la fuente que usan **TitleTextLast** y **TitleTextMachine**.
+
+## Código (`EdwinMainMenuBootstrap`)
+- Constante **`TitleLineFontAssetPath`** → `.../Fonts/RussoOne-Regular.ttf`.
+- Campo serializado **`titleLineFont`**.
+- **`ResolveTitleLineFont()`**: en editor carga por ruta; en build **`Resources.Load<Font>("Fonts/RussoOne-Regular")`**.
+- **`AddTitleBlock(..., Font titleLineFont)`**: pasa la fuente a las dos líneas; si es `null`, sigue **`MenuBuiltinFont()`** y **Bold**.
+- Con **Russo One** se usa **`FontStyle.Normal`** (la familia ya es display; el Bold de UI a veces la estropea).
+- **`ApplyTitleOverlayLineFonts`**: tras cablear el Canvas, actualiza **LAST/MACHINE** en escenas ya horneadas.
+
+## Escena `Edwin.unity`
+- **`titleLineFont`** en el bootstrap apunta a **Russo One** (`8446318f5d967f34fb28d8056d0b43bc`).
+- Los **Text** de LAST y MACHINE usan esa fuente y **`m_FontStyle: 0`**.
+
+## Editor (`EdwinMainMenuSceneBuilder`)
+- **`TitleLineFontAssetPath`**, asignación en **`AssignMenuAudioClips`** y **`AddTitleBlock(..., titleFont)`** al hornear.
+
+## Builds
+- **`Resources/Fonts/RussoOne-Regular.ttf`** (+ `.meta` con GUID propio) para que cargue en player sin AssetDatabase.
+
+Si Unity reescribe el **`fileID`** del `Font` en la escena al abrirla, es normal; el **GUID** es el que importa.
+
+---
+
+**User**
+
+En uno de los archivo de mi Arandia hay una advertencia, NO lo vamos a corregir en Edwin sino en Arandia que es de mi colega 
+Assets\01_Script\Arandia\UI\HUDBuilder_Arandia.cs(144,17): warning CS0618: 'Object.FindObjectOfType<T>()' is obsolete: 'Object.FindObjectOfType has been deprecated. Use Object.FindFirstObjectByType instead or if finding any instance is acceptable the faster Object.FindAnyObjectByType'
+
+
+---
+
+**Cursor**
+
+Reemplazando `FindObjectOfType` por `FindFirstObjectByType` (misma semántica: comprobar si existe un EventSystem).
+
+
+
+Listo, solo en **`Assets/01_Script/Arandia/UI/HUDBuilder_Arandia.cs`**.
+
+En la línea 144, `FindObjectOfType<EventSystem>()` pasó a **`FindFirstObjectByType<EventSystem>()`**, que es la API recomendada en Unity 6 para “hay algún EventSystem en la escena”. El comportamiento sigue siendo el mismo: si no hay ninguno, se crea uno. Edwin no se tocó.
+
+---
+
+**User**
+
+Ahora los colores de las letras:
+Para el titulo
+LAST es a3856dff,
+MACHINE es 9e7554ff,
+para el boton START fcae0eff,
+y para el boton CREDITS es 2b9fadff.
+
+---
+
+**Cursor**
+
+Buscando dónde se definen los colores del título, START y CREDITS.
+
+
+
+Añadiendo colores centralizados, actualizando el bootstrap, la animación de hover (sincronizar color base), el scene builder y `Edwin.unity`.
+
+
+
+Resumen de cambios:
+
+## Paleta (hex **RRGGBB** + alpha **FF** → `Color` lineal 0–1)
+- **LAST** `#a3856dff` → `MenuTitleLastColor`
+- **MACHINE** `#9e7554ff` → `MenuTitleMachineColor`
+- **START** `#fcae0eff` → `MenuButtonStartTextColor`
+- **CREDITS** `#2b9fadff` → `MenuButtonCreditsTextColor`
+
+Definidas en **`EdwinMainMenuBootstrap`** como `public static readonly` (y helper `ByteRgba`) para reutilizarlas en el editor.
+
+## Código
+- **`SetupTitleLineText`**: color según el texto `LAST` / `MACHINE`.
+- **`ApplyTitleOverlayLineFonts`**: además de la fuente, aplica esos colores a `TitleTextLast` y `TitleTextMachine`.
+- **`ApplyMenuActionButtonLabelColors`**: recorre los `Text` del canvas; si el texto es **START** o **CREDITS**, aplica el color correspondiente.
+- Tras eso, **`EdwinStartButtonHoverAnim.SyncBaseTextColorFromLabel()`** en cada botón con hover para que el brillo al pasar el puntero parta del color nuevo.
+- **`EdwinStartButtonHoverAnim`**: método público **`SyncBaseTextColorFromLabel()`** (vuelve a leer el color del label y hace `ApplyTargets(force: true)`).
+- **`BuildUiFromSprites`** y **`EdwinMainMenuSceneBuilder`**: texto START con **`MenuButtonStartTextColor`**.
+
+## `Edwin.unity`
+Actualizados los **`m_Color`** de los `Text` de CREDITS, LAST, MACHINE y START para que coincidan con la escena guardada.
+
+En **Play**, `ApplyMenuActionButtonLabelColors` refuerza START/CREDITS por si el texto coincide aunque la escena tenga otro color.
+
+---
+
+**User**
+
+Lee Assets/00_Scenes/Edwin.unity agregue un nuevo elemento para el boton Start y modifique pociciones eso quiero tener despues de hacer click en "Bake: Guardar menu en Edwin.unity" mis cambios quiero ver en escena montada antes de dar play
+
+---
+
+**Cursor**
+
+Buscando cómo funciona el bake del menú y por qué sobrescribe la escena.
+
+
+
+El bake actual destruye `MainMenu_Root` y reconstruye todo, por eso se pierden posiciones y hijos nuevos del botón START. Cambiando el botón del Inspector para que solo sincronice referencias y sprites sin borrar la jerarquía; el menú **Edwin → Build Main Menu In Edwin Scene** seguirá siendo la reconstrucción completa.
+
+
+
+## Qué pasaba
+**Bake: guardar menú en Edwin.unity** llamaba a `BuildInternal`, que **borraba todo** el `MainMenu_Root` y lo volvía a crear. Por eso perdías posiciones, hijos nuevos del START, etc.
+
+## Qué hace ahora
+Ese botón llama a **`BakePreserveMenuInEdwinScene()`**:
+
+1. Abre **Edwin.unity**.
+2. Si **no** hay `MainMenu_Root`, hace la **construcción completa** (igual que antes, primera vez).
+3. Si **sí** hay `MainMenu_Root`:
+   - **No** destruye nada.
+   - Asegura **`EdwinMainMenuBootstrap`** en el root y ejecuta **`AssignMenuAudioClips`** (música, clics, hover, fuente título).
+   - Crea **EventSystem** solo si falta.
+   - Actualiza **solo**:
+     - `Background` → sprite desde `bg_2_preview.png`
+     - el **`Image`** del objeto con **`Button`** llamado **`StartButton`** → sprite del botón por defecto
+     - `TitleRoot/TitleImage` → `title-preview` si existe esa jerarquía
+   - Añade **slider de volumen** solo si no existe `MenuMusicVolumeRoot`.
+4. Marca la escena sucia y **guarda**.
+
+Así ves en el editor **tu layout** (rects, hijos, CREDITS, etc.) y solo se refrescan referencias y esos sprites por ruta.
+
+## Reconstrucción total (cuando la quieras)
+Sigue en el menú de Unity: **Edwin → Build Main Menu In Edwin Scene** (sigue siendo **destructivo**: reemplaza todo el menú).
+
+El texto de ayuda del Inspector del bootstrap explica esto.
+
+---
+
+**User**
+
+Ahora los colores de las letras:
+Para el titulo
+LAST es fcae0eff,
+MACHINE es fcae0eff,
+para el boton START fcae0eff,
+y para el boton CREDITS es 2b9fadff.
+
+y los sonidos para el boton CREDITS no hay quiero uno igual como en el boton Start el mismo hover y el mismo sonido de click 
+
+---
+
+**Cursor**
+
+Actualizando colores y enlazando hover/clic de CREDITS igual que START. Revisando el cableado actual del menú.
+
+
+
+Actualizando colores (LAST, MACHINE y START en #fcae0e; CREDITS en #2b9fad). Corrigiendo el cableado: buscar `StartButton` y `CreditButton` por nombre y asignar el mismo hover/clic que START.
+
+
+
+## Colores (`EdwinMainMenuBootstrap`)
+- **LAST**, **MACHINE** y **START** usan **`#fcae0eff`** (`MenuTitleLastColor`, `MenuTitleMachineColor`, `MenuButtonStartTextColor`).
+- **CREDITS** sigue en **`#2b9fadff`** (`MenuButtonCreditsTextColor`).
+- `SetupTitleLineText` aplica el dorado a **LAST** y **MACHINE**.
+
+## Escena `Edwin.unity`
+- **TitleTextLast** y **TitleTextMachine**: `m_Color` → dorado `#fcae0e`.
+- **CREDITS** (texto bajo `CreditButton`): antes estaba en dorado; ahora **teal** `#2b9fad`.
+
+## Sonido CREDITS = mismo que START
+- **`WireStartButton`**: ya no usa el primer `Button` del canvas (podía ser CREDITS). Busca **`StartButton`** por nombre y lo enlaza a **`OnStartClicked`**.
+- Busca **`CreditButton`** o **`CreditsButton`**, o un `Button` cuyo hijo tenga texto **"CREDITS"**.
+- **`ConfigureMenuButtonAudio`** (antes lógica de `ConfigureStartButton`): mismo **`startButtonHoverSfx`**, mismo **`startHoverVolume`** y **`EdwinStartButtonHoverAnim`**.
+- **`OnCreditsClicked()`**: llama a **`PlayStartClickSound()`** (mismo MP3 que START). No cambia de escena; si más adelante quieres abrir créditos, se puede ampliar ahí.
+
+Tras **`ApplyMenuActionButtonColors`**, **`SyncBaseTextColorFromLabel`** en todos los `EdwinStartButtonHoverAnim` mantiene el hover alineado con el color del texto (START dorado, CREDITS teal).
 

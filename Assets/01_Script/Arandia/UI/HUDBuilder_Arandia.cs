@@ -141,7 +141,7 @@ namespace LastMachine.Arandia
         private void BuildCanvas()
         {
             // Asegurar que existe un EventSystem para los clics
-            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 GameObject es = new GameObject("EventSystem");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();

@@ -16,17 +16,32 @@ using UnityEditor;
 [DisallowMultipleComponent]
 public sealed class EdwinMainMenuBootstrap : MonoBehaviour
 {
-    const string BgAssetPath = "Assets/05_Assets/Edwin/Backgrounds/bg_preview.png";
+    const string BgAssetPath = "Assets/05_Assets/Edwin/Backgrounds/bg_2_preview.png";
     const string BtnAssetPath = "Assets/05_Assets/Edwin/UI/button_start-preview.png";
     const string TitleAssetPath = "Assets/05_Assets/Edwin/UI/title-preview.png";
     const string MenuMusicAssetPath = "Assets/05_Assets/Edwin/Audio/Music/LAST MACHINE - Main Menu.mp3";
     const string StartClickAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-click.mp3";
     const string StartHoverAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-hover.wav";
+    const string TitleLineFontAssetPath = "Assets/05_Assets/Edwin/Fonts/RussoOne-Regular.ttf";
 
     /// <summary>
     /// Unity 6+ ya no admite <c>Arial.ttf</c> como built-in; usar solo Legacy para UI generada por código.
     /// </summary>
     public static Font MenuBuiltinFont() => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+    static Color ByteRgba(byte r, byte g, byte b, byte a = 255) => new Color(r / 255f, g / 255f, b / 255f, a / 255f);
+
+    /// <summary>Color LAST / MACHINE / START (#fcae0eff).</summary>
+    public static readonly Color MenuTitleLastColor = ByteRgba(0xFC, 0xAE, 0x0E);
+
+    /// <summary>Igual que LAST (#fcae0eff).</summary>
+    public static readonly Color MenuTitleMachineColor = ByteRgba(0xFC, 0xAE, 0x0E);
+
+    /// <summary>Color del texto START (#fcae0eff).</summary>
+    public static readonly Color MenuButtonStartTextColor = ByteRgba(0xFC, 0xAE, 0x0E);
+
+    /// <summary>Color del texto del botón CREDITS.</summary>
+    public static readonly Color MenuButtonCreditsTextColor = ByteRgba(0x2B, 0x9F, 0xAD);
 
     /// <summary>
     /// Rects y fuentes del título: copiados de <c>Assets/00_Scenes/Edwin.unity</c> (TitleTextOverlay + LAST/MACHINE a mano).
@@ -48,7 +63,8 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     /// <summary>
     /// <c>TitleRoot</c> = cartel. <c>TitleImage</c> = sprite a pantalla completo del root. Textos en <c>TitleTextOverlay</c> con posiciones fijas (como en la escena).
     /// </summary>
-    public static void AddTitleBlock(Transform canvas, int uiLayer, Sprite titleSprite)
+    /// <param name="titleLineFont">LAST / MACHINE; si es null se usa <see cref="MenuBuiltinFont"/>.</param>
+    public static void AddTitleBlock(Transform canvas, int uiLayer, Sprite titleSprite, Font titleLineFont)
     {
         var rootGo = new GameObject("TitleRoot");
         rootGo.transform.SetParent(canvas, false);
@@ -95,10 +111,10 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
 
         AddTitleLineAnchored(
             overlayGo.transform, uiLayer, "TitleTextLast", "LAST",
-            TitleLastAnchoredPosition, TitleLastSizeDelta, TitleLastFontSize);
+            TitleLastAnchoredPosition, TitleLastSizeDelta, TitleLastFontSize, titleLineFont);
         AddTitleLineAnchored(
             overlayGo.transform, uiLayer, "TitleTextMachine", "MACHINE",
-            TitleMachineAnchoredPosition, TitleMachineSizeDelta, TitleMachineFontSize);
+            TitleMachineAnchoredPosition, TitleMachineSizeDelta, TitleMachineFontSize, titleLineFont);
 
         rootGo.AddComponent<EdwinTitleIdleAnim>();
     }
@@ -121,7 +137,8 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         string line,
         Vector2 anchoredPosition,
         Vector2 sizeDelta,
-        int fontSize)
+        int fontSize,
+        Font titleLineFont)
     {
         var go = new GameObject(objectName);
         go.transform.SetParent(parent, false);
@@ -132,18 +149,21 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = anchoredPosition;
         rt.sizeDelta = sizeDelta;
-        SetupTitleLineText(go.AddComponent<Text>(), line, fontSize, TextAnchor.MiddleCenter);
+        SetupTitleLineText(go.AddComponent<Text>(), line, fontSize, TextAnchor.MiddleCenter, titleLineFont);
     }
 
-    static void SetupTitleLineText(Text t, string line, int fontSize, TextAnchor alignment)
+    static void SetupTitleLineText(Text t, string line, int fontSize, TextAnchor alignment, Font titleLineFont)
     {
         t.text = line;
         t.alignment = alignment;
-        t.color = new Color(0.96f, 0.9f, 0.58f, 1f);
-        t.font = MenuBuiltinFont();
+        t.color = line == "LAST" || line == "MACHINE"
+            ? MenuTitleLastColor
+            : new Color(0.96f, 0.9f, 0.58f, 1f);
+        var f = titleLineFont != null ? titleLineFont : MenuBuiltinFont();
+        t.font = f;
 
         t.fontSize = fontSize;
-        t.fontStyle = FontStyle.Bold;
+        t.fontStyle = titleLineFont != null ? FontStyle.Normal : FontStyle.Bold;
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
         t.verticalOverflow = VerticalWrapMode.Overflow;
         t.raycastTarget = false;
@@ -181,6 +201,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     [SerializeField] AudioClip menuBackgroundMusic;
     [SerializeField] AudioClip startButtonClickSfx;
     [SerializeField] AudioClip startButtonHoverSfx;
+    [SerializeField] Font titleLineFont;
     [SerializeField, Range(0f, 1f)] float menuMusicVolume = 0.20f;
     [SerializeField, Range(0f, 1f)] float startClickVolume = 1f;
     [SerializeField, Range(0f, 1f)] float startHoverVolume = 1f;
@@ -195,6 +216,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     {
         EnsureEventSystem();
         ResolveMenuAudioClips();
+        ResolveTitleLineFont();
         EnsureMenuAudioPlayback();
 
         var canvas = GetComponentInChildren<Canvas>(true);
@@ -202,6 +224,13 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
             WireStartButton(canvas.transform);
         else
             BuildUiFromSprites();
+
+        canvas = GetComponentInChildren<Canvas>(true);
+        if (canvas != null)
+        {
+            ApplyTitleOverlayLineFonts(canvas.transform);
+            ApplyMenuActionButtonLabelColors(canvas.transform);
+        }
 
         SetupMenuMusicVolumeSlider();
     }
@@ -218,16 +247,41 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
 
     void WireStartButton(Transform canvasTransform)
     {
-        var button = canvasTransform.GetComponentInChildren<Button>(true);
-        if (button == null)
+        var startButton = FindChildButtonByGameObjectName(canvasTransform, "StartButton");
+        if (startButton == null)
+            startButton = canvasTransform.GetComponentInChildren<Button>(true);
+
+        if (startButton == null)
         {
-            Debug.LogWarning("[EdwinMainMenuBootstrap] Hay Canvas pero no se encontró Button.");
+            Debug.LogWarning("[EdwinMainMenuBootstrap] Hay Canvas pero no se encontró ningún Button.");
             return;
         }
 
-        ConfigureStartButton(button);
-        button.onClick.RemoveListener(OnStartClicked);
-        button.onClick.AddListener(OnStartClicked);
+        ConfigureMenuButtonAudio(startButton);
+        startButton.onClick.RemoveListener(OnStartClicked);
+        startButton.onClick.AddListener(OnStartClicked);
+
+        var creditButton = FindChildButtonByGameObjectName(canvasTransform, "CreditButton")
+            ?? FindChildButtonByGameObjectName(canvasTransform, "CreditsButton");
+        if (creditButton == null)
+        {
+            foreach (var b in canvasTransform.GetComponentsInChildren<Button>(true))
+            {
+                var tx = b.GetComponentInChildren<Text>(true);
+                if (tx != null && tx.text != null && tx.text.Trim() == "CREDITS")
+                {
+                    creditButton = b;
+                    break;
+                }
+            }
+        }
+
+        if (creditButton != null)
+        {
+            ConfigureMenuButtonAudio(creditButton);
+            creditButton.onClick.RemoveListener(OnCreditsClicked);
+            creditButton.onClick.AddListener(OnCreditsClicked);
+        }
 
         if (canvasTransform.Find("PressStartHint") == null)
         {
@@ -253,13 +307,24 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
                     "[EdwinMainMenuBootstrap] No se cargó title-preview; se añaden sólo las líneas LAST / MACHINE.");
             }
 
-            AddTitleBlock(canvasTransform, layer, titleSprite);
+            AddTitleBlock(canvasTransform, layer, titleSprite, titleLineFont);
         }
 
         EnsureTitleIdleAnim(canvasTransform);
     }
 
-    void ConfigureStartButton(Button button)
+    static Button FindChildButtonByGameObjectName(Transform canvas, string gameObjectName)
+    {
+        foreach (var button in canvas.GetComponentsInChildren<Button>(true))
+        {
+            if (button.gameObject.name == gameObjectName)
+                return button;
+        }
+
+        return null;
+    }
+
+    void ConfigureMenuButtonAudio(Button button)
     {
         button.transition = Selectable.Transition.None;
         var hover = button.GetComponent<EdwinStartButtonHoverAnim>();
@@ -268,9 +333,14 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         hover.SetUiSfxSource(_uiSfxSource, startButtonHoverSfx, startHoverVolume);
     }
 
+    void OnCreditsClicked()
+    {
+        PlayStartClickSound();
+    }
+
     void BuildUiFromSprites()
     {
-        var bgSprite = LoadSprite(BgAssetPath, "bg_preview");
+        var bgSprite = LoadSprite(BgAssetPath, "bg_2_preview");
         var btnSprite = LoadSprite(BtnAssetPath, "button_start-preview");
         var titleSprite = LoadSprite(TitleAssetPath, "title-preview");
         if (bgSprite == null || btnSprite == null)
@@ -319,7 +389,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         bgImg.preserveAspect = true;
         bgImg.raycastTarget = false;
 
-        AddTitleBlock(canvasGo.transform, uiLayer, titleSprite);
+        AddTitleBlock(canvasGo.transform, uiLayer, titleSprite, titleLineFont);
 
         var btnGo = new GameObject("StartButton");
         btnGo.transform.SetParent(canvasGo.transform, false);
@@ -345,7 +415,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         var text = textGo.AddComponent<Text>();
         text.text = "START";
         text.alignment = TextAnchor.MiddleCenter;
-        text.color = new Color(0.98f, 0.82f, 0.45f);
+        text.color = MenuButtonStartTextColor;
         text.font = MenuBuiltinFont();
         text.fontSize = 40;
         text.fontStyle = FontStyle.Bold;
@@ -353,7 +423,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         text.verticalOverflow = VerticalWrapMode.Overflow;
         text.raycastTarget = false;
 
-        ConfigureStartButton(button);
+        ConfigureMenuButtonAudio(button);
         button.onClick.AddListener(OnStartClicked);
         AddPressStartHint(canvasGo.transform, uiLayer);
     }
@@ -393,6 +463,55 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         if (startButtonHoverSfx == null)
             startButtonHoverSfx = Resources.Load<AudioClip>("Audio/EdwinStartHover");
 #endif
+    }
+
+    void ResolveTitleLineFont()
+    {
+#if UNITY_EDITOR
+        if (titleLineFont == null)
+            titleLineFont = AssetDatabase.LoadAssetAtPath<Font>(TitleLineFontAssetPath);
+#else
+        if (titleLineFont == null)
+            titleLineFont = Resources.Load<Font>("Fonts/RussoOne-Regular");
+#endif
+    }
+
+    void ApplyTitleOverlayLineFonts(Transform canvasTransform)
+    {
+        ResolveTitleLineFont();
+        var f = titleLineFont != null ? titleLineFont : MenuBuiltinFont();
+        var overlay = canvasTransform.Find("TitleRoot/TitleTextOverlay");
+        if (overlay == null)
+            return;
+        foreach (var tr in overlay.GetComponentsInChildren<Transform>(true))
+        {
+            if (tr.name != "TitleTextLast" && tr.name != "TitleTextMachine")
+                continue;
+            var text = tr.GetComponent<Text>();
+            if (text == null)
+                continue;
+            text.font = f;
+            text.fontStyle = titleLineFont != null ? FontStyle.Normal : FontStyle.Bold;
+            if (tr.name == "TitleTextLast")
+                text.color = MenuTitleLastColor;
+            else if (tr.name == "TitleTextMachine")
+                text.color = MenuTitleMachineColor;
+        }
+    }
+
+    void ApplyMenuActionButtonLabelColors(Transform canvasTransform)
+    {
+        foreach (var text in canvasTransform.GetComponentsInChildren<Text>(true))
+        {
+            var s = text.text != null ? text.text.Trim() : string.Empty;
+            if (s == "START")
+                text.color = MenuButtonStartTextColor;
+            else if (s == "CREDITS")
+                text.color = MenuButtonCreditsTextColor;
+        }
+
+        foreach (var hover in canvasTransform.GetComponentsInChildren<EdwinStartButtonHoverAnim>(true))
+            hover.SyncBaseTextColorFromLabel();
     }
 
     void EnsureMenuAudioPlayback()
