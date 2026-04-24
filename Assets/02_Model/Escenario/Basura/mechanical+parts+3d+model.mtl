@@ -1,0 +1,6 @@
+newmtl tripo_material_a6e520c6_addc_41e3_b2d9_38c2e0a804f9
+Kd 1.000000000 1.000000000 1.000000000
+d 1.000000000
+illum 2
+map_Kd mechanical+parts+3d+model_basecolor.jpg
+
