@@ -11,11 +11,26 @@ namespace LastMachine.Arandia
 {
     public class HUDBuilder_Arandia : MonoBehaviour
     {
+        public static HUDBuilder_Arandia Instance;
+
         [Header("Referencias - Arandia")]
         public TurretController_Arandia[] turrets;
         public RepairSystem_Arandia repairSystem;
         public WaveManager_Arandia waveManager;
         public GameManager_Arandia gameManager;
+
+        void Awake()
+        {
+            if (Instance == null) 
+            {
+                Instance = this;
+                Debug.Log($"<color=cyan>[Singleton] HUD Instance asignada al objeto: {gameObject.name}</color>");
+            }
+            else if (Instance != this)
+            {
+                Debug.LogWarning($"<color=red>[Singleton] ¡CUIDADO! Hay un HUD duplicado en el objeto: {gameObject.name}. DEBES BORRARLO.</color>");
+            }
+        }
 
         // Colores del tema LAST MACHINE (Pixel-Art Retro de Guerra)
         private Color bgDark      = new Color(0.05f, 0.07f, 0.1f, 0.95f);
@@ -257,6 +272,8 @@ namespace LastMachine.Arandia
                     activeTurret.motor.TakeDamage(20);
                 }
             });
+
+            turretPanel.SetActive(false);
         }
 
         private void BuildWaveInfoPanel()
@@ -292,24 +309,72 @@ namespace LastMachine.Arandia
             victoryScore.alignment = TextAlignmentOptions.Center;
         }
 
-        private void OnEnterTurret(TurretController_Arandia t) { activeTurret = t; promptOverlay.SetActive(true); }
-        private void OnExitTurret(TurretController_Arandia t) { 
-            if(activeTurret == t) { activeTurret = null; promptOverlay.SetActive(false); turretPanel.SetActive(false); isShowingTurretHUD = false; }
+        public void ShowPrompt()
+        {
+            if (promptOverlay != null) promptOverlay.SetActive(true);
         }
+
+        public void HidePrompt()
+        {
+            if (promptOverlay != null) promptOverlay.SetActive(false);
+            HideTurretPanel(); // Si se aleja, cerramos todo
+        }
+
+        public void ShowTurretPanel(TurretController_Arandia t)
+        {
+            activeTurret = t;
+            if (turretPanel != null) 
+            {
+                turretPanel.SetActive(true);
+                Debug.Log($"[HUD] Panel de mantenimiento ACTIVADO para {t.turretName}");
+            }
+            else
+            {
+                Debug.LogError("[HUD] ERROR: El panel de mantenimiento (turretPanel) es NULL");
+            }
+
+            if (promptOverlay != null) promptOverlay.SetActive(false);
+            isShowingTurretHUD = true;
+
+            // Liberar el raton
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+
+            RefreshTurretPanel();
+        }
+
+        public void HideTurretPanel()
+        {
+            if (turretPanel != null) turretPanel.SetActive(false);
+            activeTurret = null;
+            isShowingTurretHUD = false;
+
+            // Volver a esconder el raton para jugar
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        private void OnEnterTurret(TurretController_Arandia t) { ShowTurretPanel(t); }
+        private void OnExitTurret(TurretController_Arandia t) { HideTurretPanel(); }
         private void ShowVictory() { victoryPanel.SetActive(true); }
 
         private void RefreshTurretPanel()
         {
             if (!isShowingTurretHUD || activeTurret == null) return;
 
+            // Actualizar nombre
+            if (turretNameLabel != null) turretNameLabel.text = activeTurret.turretName;
+
             TurretComponent_Arandia[] comps = { activeTurret.sensor, activeTurret.canon, activeTurret.motor };
             for (int i = 0; i < 3; i++)
             {
+                if (comps[i] == null) continue;
+
                 float pct = comps[i].HPPercent;
                 Color c = pct > 0.5f ? greenOK : (pct > 0.2f ? orangeWarn : redBad);
                 compStatusText[i].text = $"ESTADO: {Mathf.RoundToInt(pct*100)}% - {(pct > 0.5f ? "OPTIMAL" : (pct > 0.2f ? "CRÍTICO" : "FALLO"))}";
                 compStatusText[i].color = c;
-                compIconBorders[i].GetComponent<Outline>().effectColor = c;
+                compIconBorders[i].color = c;
             }
         }
 

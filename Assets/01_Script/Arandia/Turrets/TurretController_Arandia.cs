@@ -21,23 +21,23 @@ namespace LastMachine.Arandia
         public TurretComponent_Arandia canon;
         public TurretComponent_Arandia motor;
 
-        [Header("Configuracion de Disparo")]
-        public Transform firePoint;
+        [Header("Configuracion de Combate")]
+        public float baseFireRate = 1f;
+        public float detectionRange = 30f;
+        public float baseDamage = 10f;
         public GameObject projectilePrefab;
-        public float baseFireRate = 1f;      // disparos por segundo
-        public float detectionRange = 10f;
-        public float baseDamage = 25f;
+        public Transform firePoint;
+
+        [Header("Visuales")]
+        public TurretAnimator_Arandia turretAnimator;
 
         [Header("Estado")]
-        [SerializeField] private bool isActive = true;
+        private float fireTimer = 0;
+        private bool isActive = true;
         [SerializeField] private bool playerInRange = false;
-
-        [Header("Animacion")]
-        public TurretAnimator_Arandia turretAnimator;
 
         // Referencias internas
         private Transform currentTarget;
-        private float fireTimer;
         private List<Transform> enemiesInRange = new List<Transform>();
 
         // Eventos
@@ -74,6 +74,13 @@ namespace LastMachine.Arandia
 
             CleanEnemyList();
 
+            // INTERACCIÓN CON JUGADOR
+            if (playerInRange && Input.GetKeyDown(KeyCode.E))
+            {
+                Debug.Log($"[Interaccion] Abriendo HUD de {turretName}");
+                HUDBuilder_Arandia.Instance?.ShowTurretPanel(this);
+            }
+
             // LÓGICA DEL SENSOR (APUNTADO)
             if (!sensor.IsBroken)
             {
@@ -85,7 +92,7 @@ namespace LastMachine.Arandia
             }
             else
             {
-                // FALLO DEL SENSOR: Apuntado errático aleatorio
+                // FALLO DEL SENSOR
                 if (turretAnimator != null)
                 {
                     Vector3 randomPos = transform.position + transform.forward * 10f + transform.right * Mathf.Sin(Time.time * 2f) * 5f;
@@ -96,8 +103,7 @@ namespace LastMachine.Arandia
             // LÓGICA DEL MOTOR Y CAÑÓN (DISPARO)
             if (!canon.IsBroken)
             {
-                float fireRate = baseFireRate;
-                if (motor.IsBroken) fireRate *= 0.2f; // Motor roto = 20% cadencia
+                float fireRate = GetAdjustedFireRate();
 
                 fireTimer += Time.deltaTime;
                 if (fireTimer >= 1f / fireRate && currentTarget != null)
@@ -225,19 +231,24 @@ namespace LastMachine.Arandia
         // Deteccion de jugador para HUD
         private void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Player"))
+            // Debug para saber qué está tocando la torreta
+            Debug.Log($"[Torreta] Algo ha entrado en el circulo: {other.name} (Tag: {other.tag})");
+
+            if (other.CompareTag("Player") || other.name.Contains("Player") || other.name.Contains("Capsule"))
             {
                 playerInRange = true;
-                OnPlayerEnterRange?.Invoke(this);
+                Debug.Log("[Torreta] ¡JUGADOR DETECTADO! Ahora puedes pulsar E");
+                HUDBuilder_Arandia.Instance?.ShowPrompt();
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.CompareTag("Player"))
+            if (other.CompareTag("Player") || other.name.Contains("Player") || other.name.Contains("Capsule"))
             {
                 playerInRange = false;
-                OnPlayerExitRange?.Invoke(this);
+                Debug.Log("[Torreta] Jugador ha salido del rango");
+                HUDBuilder_Arandia.Instance?.HidePrompt();
             }
         }
 

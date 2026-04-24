@@ -33,6 +33,8 @@ namespace LastMachine.Arandia
         [Tooltip("Velocidad de giro del radar en idle (grados/seg)")]
         public float sensorIdleSpeed = 45f;
 
+        public Vector3 rotationOffset = new Vector3(0, 180, 0); // Por defecto 180 para corregir el "disparo por la espalda"
+
         [Header("Recoil de Disparo")]
         public float recoilDistance = 0.15f;
         public float recoilDuration = 0.08f;
@@ -185,8 +187,8 @@ namespace LastMachine.Arandia
             Vector3 direction = (currentAimTarget - canonPivot.position).normalized;
             if (direction == Vector3.zero) return;
 
-            // Rotación forzada después de las animaciones
-            Quaternion targetRot = Quaternion.LookRotation(direction);
+            // Rotación forzada después de las animaciones + Corrección de eje
+            Quaternion targetRot = Quaternion.LookRotation(direction) * Quaternion.Euler(rotationOffset);
             canonPivot.rotation = Quaternion.Slerp(canonPivot.rotation, targetRot, Time.deltaTime * canonRotationSpeed * 5f);
             
             // Resetear para el siguiente frame

@@ -3,14 +3,19 @@ using System.Collections;
 
 namespace LastMachine.Arandia
 {
+    public enum EnemyType { Scrapper, Jammer, Drainer, Rusher }
+
     public class EnemyController_Arandia : MonoBehaviour
     {
+        [Header("Configuracion de IA")]
+        public EnemyType type;
         public float speed = 3f;
         public float attackRange = 2f;
         public int damagePerHit = 10;
         public float attackInterval = 1.5f;
 
         private GameObject targetTurret;
+        private TurretComponent_Arandia targetComponent;
         private bool isAttacking = false;
 
         void Start()
@@ -26,18 +31,18 @@ namespace LastMachine.Arandia
                 return;
             }
 
-            float distance = Vector3.Distance(transform.position, targetTurret.transform.position);
+            // Moverse hacia el componente específico, no solo hacia la torreta
+            Vector3 targetPos = targetComponent != null ? targetComponent.transform.position : targetTurret.transform.position;
+            float distance = Vector3.Distance(transform.position, targetPos);
 
             if (distance > attackRange)
             {
-                // MOVERSE HACIA LA TORRETA
-                Vector3 direction = (targetTurret.transform.position - transform.position).normalized;
+                Vector3 direction = (targetPos - transform.position).normalized;
                 transform.position += direction * speed * Time.deltaTime;
-                transform.LookAt(new Vector3(targetTurret.transform.position.x, transform.position.y, targetTurret.transform.position.z));
+                transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
             }
-            else if (!isAttacking)
+            else if (!isAttacking && targetComponent != null)
             {
-                // ATACAR
                 StartCoroutine(AttackRoutine());
             }
         }
@@ -54,21 +59,37 @@ namespace LastMachine.Arandia
                 {
                     closestDist = dist;
                     targetTurret = t;
+                    AssignTargetComponent(t.GetComponent<TurretController_Arandia>());
                 }
+            }
+        }
+
+        void AssignTargetComponent(TurretController_Arandia controller)
+        {
+            if (controller == null) return;
+
+            switch (type)
+            {
+                case EnemyType.Jammer:
+                    targetComponent = controller.sensor;
+                    break;
+                case EnemyType.Scrapper:
+                case EnemyType.Rusher:
+                    targetComponent = controller.canon;
+                    break;
+                case EnemyType.Drainer:
+                    targetComponent = controller.motor;
+                    break;
             }
         }
 
         IEnumerator AttackRoutine()
         {
             isAttacking = true;
-            while (targetTurret != null && Vector3.Distance(transform.position, targetTurret.transform.position) <= attackRange)
+            while (targetComponent != null && !targetComponent.IsBroken && Vector3.Distance(transform.position, targetComponent.transform.position) <= attackRange)
             {
-                var controller = targetTurret.GetComponent<TurretController_Arandia>();
-                if (controller != null)
-                {
-                    Debug.Log("¡Enemigo atacando CAÑÓN de " + targetTurret.name + "!");
-                    controller.canon.TakeDamage(damagePerHit);
-                }
+                Debug.Log($"[IA] {name} ({type}) atacando {targetComponent.gameObject.name}");
+                targetComponent.TakeDamage(damagePerHit);
                 yield return new WaitForSeconds(attackInterval);
             }
             isAttacking = false;
