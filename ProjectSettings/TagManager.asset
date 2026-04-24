@@ -5,12 +5,29 @@ TagManager:
   serializedVersion: 3
   tags:
   - Player
+  - Torreta
+  - "Ca\xF1on"
+  - Motor
+  - Sensor
+  - Scrapper
+  - Armored
+  - Jammer
+  - SplitterP
+  - Drainer
+  - Rusher
+  - SplitterH
+  - Boss
+  - Tunder
+  - PiezaMotor
+  - PiezaSensor
+  - "PiezaCa\xF1on"
+  - Misil
   - Enemy
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PostProcessing
   - Water
   - UI
   - Turret
@@ -45,3 +62,4 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
+  - PostProcessing
