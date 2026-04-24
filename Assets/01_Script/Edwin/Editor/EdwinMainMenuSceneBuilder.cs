@@ -15,18 +15,129 @@ using UnityEngine.UI;
 public static class EdwinMainMenuSceneBuilder
 {
     const string ScenePath = "Assets/00_Scenes/Edwin.unity";
-    const string BgPath = "Assets/05_Assets/Edwin/Backgrounds/bg_preview.png";
+    const string BgPath = "Assets/05_Assets/Edwin/Backgrounds/bg_2_preview.png";
     const string BtnPath = "Assets/05_Assets/Edwin/UI/button_start-preview.png";
     const string TitlePath = "Assets/05_Assets/Edwin/UI/title-preview.png";
-    const string MenuMusicAssetPath =
-        "Assets/05_Assets/Edwin/Audio/Music/monume-retro-arcade-game-music/monume-retro-arcade-game-music-509489.mp3";
+    const string MenuMusicAssetPath = "Assets/05_Assets/Edwin/Audio/Music/LAST MACHINE - Main Menu.mp3";
     const string StartClickAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-click.mp3";
     const string StartHoverAssetPath = "Assets/05_Assets/Edwin/Audio/SFX/button-start-hover.wav";
+    const string TitleLineFontAssetPath = "Assets/05_Assets/Edwin/Fonts/RussoOne-Regular.ttf";
 
     [MenuItem("Edwin/Build Main Menu In Edwin Scene")]
     public static void BuildFromMenu()
     {
         BuildInternal(save: true);
+    }
+
+    /// <summary>
+    /// Bake desde el Inspector: no destruye <c>MainMenu_Root</c>; solo actualiza referencias y sprites por ruta
+    /// para ver cambios de layout en el editor sin Play. Si no existe el root, hace construcción completa.
+    /// </summary>
+    public static void BakePreserveMenuInEdwinScene()
+    {
+        EnsureSpriteTextureImport(BgPath);
+        EnsureSpriteTextureImport(BtnPath);
+        EnsureSpriteTextureImport(TitlePath);
+        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+
+        var bgSprite = LoadSpriteFromTextureAsset(BgPath);
+        var btnSprite = LoadSpriteFromTextureAsset(BtnPath);
+        var titleSprite = LoadSpriteFromTextureAsset(TitlePath);
+        if (bgSprite == null || btnSprite == null)
+        {
+            Debug.LogError(
+                "[EdwinMainMenuSceneBuilder] Bake: no se pudieron cargar sprites en " + BgPath + " / " + BtnPath + ".");
+            return;
+        }
+
+        if (titleSprite == null)
+        {
+            Debug.LogWarning(
+                "[EdwinMainMenuSceneBuilder] Bake: no se cargó " + TitlePath + "; no se actualizará TitleImage.");
+        }
+
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        GameObject rootGo = null;
+        foreach (var go in SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            if (go.name == "MainMenu_Root")
+            {
+                rootGo = go;
+                break;
+            }
+        }
+
+        if (rootGo == null)
+        {
+            Debug.Log(
+                "[EdwinMainMenuSceneBuilder] Bake: no hay MainMenu_Root; se ejecuta construcción completa (primera vez).");
+            BuildInternal(save: true);
+            return;
+        }
+
+        var bootstrap = rootGo.GetComponent<EdwinMainMenuBootstrap>();
+        if (bootstrap == null)
+            bootstrap = rootGo.AddComponent<EdwinMainMenuBootstrap>();
+        AssignMenuAudioClips(bootstrap);
+
+        if (rootGo.GetComponentInChildren<EventSystem>(true) == null)
+        {
+            var esGo = new GameObject("EventSystem");
+            esGo.transform.SetParent(rootGo.transform, false);
+            esGo.AddComponent<EventSystem>();
+            esGo.AddComponent<InputSystemUIInputModule>();
+        }
+
+        var canvas = rootGo.GetComponentInChildren<Canvas>(true);
+        if (canvas != null)
+        {
+            var bgTr = canvas.transform.Find("Background");
+            if (bgTr != null)
+            {
+                var bgImg = bgTr.GetComponent<Image>();
+                if (bgImg != null)
+                    bgImg.sprite = bgSprite;
+            }
+
+            foreach (var button in canvas.GetComponentsInChildren<Button>(true))
+            {
+                if (button.gameObject.name != "StartButton")
+                    continue;
+                var img = button.GetComponent<Image>();
+                if (img != null)
+                    img.sprite = btnSprite;
+                break;
+            }
+
+            var titleRoot = canvas.transform.Find("TitleRoot");
+            if (titleRoot != null && titleSprite != null)
+            {
+                var titleImgTr = titleRoot.Find("TitleImage");
+                if (titleImgTr != null)
+                {
+                    var tImg = titleImgTr.GetComponent<Image>();
+                    if (tImg != null)
+                        tImg.sprite = titleSprite;
+                }
+            }
+
+            if (canvas.transform.Find("MenuMusicVolumeRoot") == null)
+            {
+                const int uiLayer = 5;
+                var volumeSlider = EdwinMainMenuBootstrap.BuildMenuMusicVolumeSliderUi(canvas.transform, uiLayer, 1);
+                if (volumeSlider != null)
+                {
+                    var soBoot = new SerializedObject(bootstrap);
+                    var pVol = soBoot.FindProperty("menuMusicVolume");
+                    volumeSlider.value = pVol != null ? pVol.floatValue : 0.2f;
+                }
+            }
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveOpenScenes();
+        Debug.Log(
+            "[EdwinMainMenuSceneBuilder] Bake preservando jerarquía: referencias bootstrap + sprites (Background, START, TitleImage si existe).");
     }
 
     /// <summary>
@@ -153,7 +264,8 @@ public static class EdwinMainMenuSceneBuilder
         bgImg.preserveAspect = true;
         bgImg.raycastTarget = false;
 
-        EdwinMainMenuBootstrap.AddTitleBlock(canvasGo.transform, uiLayer, titleSprite);
+        var titleFont = AssetDatabase.LoadAssetAtPath<Font>(TitleLineFontAssetPath);
+        EdwinMainMenuBootstrap.AddTitleBlock(canvasGo.transform, uiLayer, titleSprite, titleFont);
 
         var btnGo = new GameObject("StartButton");
         btnGo.transform.SetParent(canvasGo.transform, false);
@@ -179,7 +291,7 @@ public static class EdwinMainMenuSceneBuilder
         var text = textGo.AddComponent<Text>();
         text.text = "START";
         text.alignment = TextAnchor.MiddleCenter;
-        text.color = new Color(0.98f, 0.82f, 0.45f);
+        text.color = EdwinMainMenuBootstrap.MenuButtonStartTextColor;
         text.font = EdwinMainMenuBootstrap.MenuBuiltinFont();
         text.fontSize = 40;
         text.fontStyle = FontStyle.Bold;
@@ -222,16 +334,20 @@ public static class EdwinMainMenuSceneBuilder
         var music = AssetDatabase.LoadAssetAtPath<AudioClip>(MenuMusicAssetPath);
         var click = AssetDatabase.LoadAssetAtPath<AudioClip>(StartClickAssetPath);
         var hover = AssetDatabase.LoadAssetAtPath<AudioClip>(StartHoverAssetPath);
+        var titleFont = AssetDatabase.LoadAssetAtPath<Font>(TitleLineFontAssetPath);
         var so = new SerializedObject(bootstrap);
         var m = so.FindProperty("menuBackgroundMusic");
         var s = so.FindProperty("startButtonClickSfx");
         var h = so.FindProperty("startButtonHoverSfx");
+        var tf = so.FindProperty("titleLineFont");
         if (m != null)
             m.objectReferenceValue = music;
         if (s != null)
             s.objectReferenceValue = click;
         if (h != null)
             h.objectReferenceValue = hover;
+        if (tf != null)
+            tf.objectReferenceValue = titleFont;
         so.ApplyModifiedPropertiesWithoutUndo();
 
         if (music == null)
@@ -240,6 +356,8 @@ public static class EdwinMainMenuSceneBuilder
             Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró SFX clic en " + StartClickAssetPath);
         if (hover == null)
             Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró SFX hover en " + StartHoverAssetPath);
+        if (titleFont == null)
+            Debug.LogWarning("[EdwinMainMenuSceneBuilder] No se encontró fuente título en " + TitleLineFontAssetPath);
     }
 
     /// <summary>
