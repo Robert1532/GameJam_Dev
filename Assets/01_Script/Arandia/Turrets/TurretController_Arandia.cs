@@ -117,20 +117,6 @@ namespace LastMachine.Arandia
             }
         }
 
-        private void HandleFiring()
-        {
-            if (canon.IsBroken || currentTarget == null) return;
-
-            float fireRate = GetAdjustedFireRate();
-            fireTimer += Time.deltaTime;
-
-            if (fireTimer >= 1f / fireRate)
-            {
-                fireTimer = 0f;
-                Fire();
-            }
-        }
-
         private void Fire()
         {
             if (firePoint == null || projectilePrefab == null) return;
