@@ -14,7 +14,7 @@ namespace LastMachine.Arandia
         public static HUDBuilder_Arandia Instance;
 
         [Header("Referencias - Arandia")]
-        public TurretController_Arandia[] turrets;
+        public List<TurretController_Arandia> turrets = new List<TurretController_Arandia>();
         public RepairSystem_Arandia repairSystem;
         public WaveManager_Arandia waveManager;
         public GameManager_Arandia gameManager;

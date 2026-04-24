@@ -57,7 +57,7 @@ namespace LastMachine.Arandia.Editor
             GameManager_Arandia gameManager = gameSystems.AddComponent<GameManager_Arandia>();
             WaveManager_Arandia waveManager = gameSystems.AddComponent<WaveManager_Arandia>();
 
-            gameManager.turrets = new TurretController_Arandia[] { tNorte, tSur, tEste, tOeste };
+            gameManager.turrets = new System.Collections.Generic.List<TurretController_Arandia> { tNorte, tSur, tEste, tOeste };
             gameManager.waveManager = waveManager;
 
             // Spawner de piezas
