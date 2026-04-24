@@ -201,6 +201,63 @@ MonoBehaviour:
   currentHP: 0
   state: 0
   componentAnimator: {fileID: 0}
+--- !u!1001 &20550161
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 7.21009
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.37
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3.42
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032667077577443923, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8822004988023726371, guid: d0cd7eea31636554f83198387f318638, type: 3}
+      propertyPath: m_Name
+      value: Torreta
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d0cd7eea31636554f83198387f318638, type: 3}
 --- !u!4 &20837172 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dd9f2c24bd3d7f14d84f46eef030c4eb, type: 3}
@@ -644,10 +701,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.GameManager_Arandia
   turrets:
-  - {fileID: 897352245}
+  - {fileID: 0}
   - {fileID: 2125210057}
   - {fileID: 1028480171}
   - {fileID: 1135043219}
+  - {fileID: 1737900131}
   waveManager: {fileID: 511092214}
   gameOverPanel: {fileID: 0}
   gameOverTitle: {fileID: 0}
@@ -1218,17 +1276,6 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 3360f271551eaa941b841e3f34ab57dc, type: 3}
   m_PrefabInstance: {fileID: 749600273}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &897352245 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 125438997713379591, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-  m_PrefabInstance: {fileID: 5245901701287957663}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 273265fd105e46d42979e0fc0d9f078c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.TurretController_Arandia
 --- !u!1001 &941501092
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1549,14 +1596,13 @@ MonoBehaviour:
   sensor: {fileID: 1487125128}
   canon: {fileID: 2085830038}
   motor: {fileID: 740133914}
-  firePoint: {fileID: 1406671033}
-  projectilePrefab: {fileID: 49080257379008806, guid: b491efe6873f0054289e1521692f43aa, type: 3}
   baseFireRate: 1
   detectionRange: 10
   baseDamage: 25
-  isActive: 1
-  playerInRange: 0
+  projectilePrefab: {fileID: 49080257379008806, guid: b491efe6873f0054289e1521692f43aa, type: 3}
+  firePoint: {fileID: 1406671033}
   turretAnimator: {fileID: 0}
+  playerInRange: 0
 --- !u!4 &1028480172
 Transform:
   m_ObjectHideFlags: 0
@@ -1618,6 +1664,7 @@ MonoBehaviour:
   firePoint: {fileID: 1406671033}
   canonRotationSpeed: 90
   sensorIdleSpeed: 45
+  rotationOffset: {x: 0, y: 180, z: 0}
   recoilDistance: 0.15
   recoilDuration: 0.08
   recoilReturnDuration: 0.2
@@ -1730,13 +1777,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.HUDBuilder_Arandia
   turrets:
-  - {fileID: 897352245}
+  - {fileID: 0}
   - {fileID: 2125210057}
   - {fileID: 1028480171}
   - {fileID: 1135043219}
+  - {fileID: 1737900131}
   repairSystem: {fileID: 220839826}
   waveManager: {fileID: 511092214}
   gameManager: {fileID: 511092213}
+  panelBackground: {fileID: 21300000, guid: 780d2d41727701143ab4a3576d313701, type: 3}
   sensorIcon: {fileID: 21300000, guid: d53c0009b9480ba41897a6a0c2b39c75, type: 3}
   canonIcon: {fileID: 21300000, guid: 5708730fa432745479d50c2a9d60d41d, type: 3}
   motorIcon: {fileID: 21300000, guid: e4a7b0c8e614520469a6e2c88766e3aa, type: 3}
@@ -2100,6 +2149,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce168bace13d5094eb8941df4844e6ab, type: 3}
+--- !u!114 &1737900131 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2905432866725207880, guid: d0cd7eea31636554f83198387f318638, type: 3}
+  m_PrefabInstance: {fileID: 20550161}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 273265fd105e46d42979e0fc0d9f078c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.TurretController_Arandia
 --- !u!1 &1767837418
 GameObject:
   m_ObjectHideFlags: 0
@@ -2146,6 +2206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5afc111b638fc3a47a805b66cba9c12e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.EnemyController_Arandia
+  type: 3
   speed: 3
   attackRange: 2
   damagePerHit: 10
@@ -2393,14 +2454,13 @@ MonoBehaviour:
   sensor: {fileID: 1019053363}
   canon: {fileID: 1861685441}
   motor: {fileID: 4055010}
-  firePoint: {fileID: 1031088694}
-  projectilePrefab: {fileID: 49080257379008806, guid: b491efe6873f0054289e1521692f43aa, type: 3}
   baseFireRate: 1
   detectionRange: 10
   baseDamage: 25
-  isActive: 1
-  playerInRange: 0
+  projectilePrefab: {fileID: 49080257379008806, guid: b491efe6873f0054289e1521692f43aa, type: 3}
+  firePoint: {fileID: 1031088694}
   turretAnimator: {fileID: 0}
+  playerInRange: 0
 --- !u!4 &2125210058
 Transform:
   m_ObjectHideFlags: 0
@@ -2462,6 +2522,7 @@ MonoBehaviour:
   firePoint: {fileID: 1031088694}
   canonRotationSpeed: 90
   sensorIdleSpeed: 45
+  rotationOffset: {x: 0, y: 180, z: 0}
   recoilDistance: 0.15
   recoilDuration: 0.08
   recoilReturnDuration: 0.2
@@ -2570,63 +2631,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4af944b28f4b71e42a40ee7823bb4722, type: 3}
---- !u!1001 &5245901701287957663
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -20
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2684872679771406867, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6106802807929548781, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
-      propertyPath: m_Name
-      value: Torreta_Norte
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: a190f37cde27e8345acdbbb17b8dbbfb, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2634,7 +2638,6 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 778218233}
-  - {fileID: 5245901701287957663}
   - {fileID: 2125210058}
   - {fileID: 1028480172}
   - {fileID: 1875358162113312911}
@@ -2643,3 +2646,4 @@ SceneRoots:
   - {fileID: 1034156334}
   - {fileID: 1110000002}
   - {fileID: 1767837424}
+  - {fileID: 20550161}
