@@ -1,0 +1,6 @@
+newmtl tripo_material_99918793_a223_4d58_8b06_f79b227e4ce5
+Kd 1.000000000 1.000000000 1.000000000
+d 1.000000000
+illum 2
+map_Kd flexible+pipe+3d+model_basecolor.jpg
+

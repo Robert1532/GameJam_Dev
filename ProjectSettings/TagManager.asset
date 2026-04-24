@@ -2,19 +2,39 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Player
+  - Torreta
+  - "Ca\xF1on"
+  - Motor
+  - Sensor
+  - Scrapper
+  - Armored
+  - Jammer
+  - SplitterP
+  - Drainer
+  - Rusher
+  - SplitterH
+  - Boss
+  - Tunder
+  - PiezaMotor
+  - PiezaSensor
+  - "PiezaCa\xF1on"
+  - Misil
+  - Enemy
+  - Turret
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PostProcessing
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Turret
+  - Enemy
+  - Turret
+  - Enemy
   - 
   - 
   - 
@@ -41,3 +61,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default
+  - PostProcessing
