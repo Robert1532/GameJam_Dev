@@ -9,6 +9,8 @@ public class Drainer : MonoBehaviour
     public float velocidad = 2.5f;
     public Animator animator;
     public GameObject PiezaCañonPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float vida = 70f;
     public float daño = 18f;
@@ -19,8 +21,10 @@ public class Drainer : MonoBehaviour
         agente.speed = velocidad;
 
         agente.stoppingDistance = 1f;
-
         agente.acceleration = 20f;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -79,6 +83,8 @@ public class Drainer : MonoBehaviour
     {
         if (PiezaCañonPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaCañonPrefab, transform.position, Quaternion.identity);
         }
 

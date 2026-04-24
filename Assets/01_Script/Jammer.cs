@@ -11,6 +11,8 @@ public class Jammer : MonoBehaviour
     private GameObject rayoInstanciado;
     public Animator animator;
     public GameObject PiezaSensorPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float vida = 100f;
     public float daño = 7f;
@@ -19,6 +21,9 @@ public class Jammer : MonoBehaviour
     {
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 7f;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -76,6 +81,8 @@ public class Jammer : MonoBehaviour
 
         if (PiezaSensorPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
         }
 

@@ -52,6 +52,8 @@ MonoBehaviour:
   tagObjetivo: "Ca\xF1on"
   animator: {fileID: 2525390714989126445}
   PiezaMotorPrefab: {fileID: 299937458609350935, guid: 199fa4b4b507ae94a8a9209eafc74f97, type: 3}
+  efectoExplosion: {fileID: 3937646882799579496, guid: 65b3df8a83143114e8f2d03c04ac4514, type: 3}
+  efectoDestello: {fileID: 4487766158467488113, guid: 95f0af5ad9b0ae44ead206ef88dd86e7, type: 3}
   vida: 100
   "da\xF1o": 12
 --- !u!33 &3118304510143725832

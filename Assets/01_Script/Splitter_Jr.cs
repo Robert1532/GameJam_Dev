@@ -11,6 +11,8 @@ public class Splitter_Jr : MonoBehaviour
     private float anguloPersonal;
     public Animator animator;
     public GameObject PiezaCañonPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float alturaSalto = 4f;
     public float duracionSalto = 0.4f;
@@ -25,6 +27,9 @@ public class Splitter_Jr : MonoBehaviour
         agente.speed = 7f;
 
         anguloPersonal = Random.Range(0, 360) * Mathf.Deg2Rad;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
 
         if (agente != null) agente.enabled = false;
         StartCoroutine(SecuenciaActivacionHijo());
@@ -113,6 +118,8 @@ public class Splitter_Jr : MonoBehaviour
     {
         if (PiezaCañonPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaCañonPrefab, transform.position, Quaternion.identity);
         }
 

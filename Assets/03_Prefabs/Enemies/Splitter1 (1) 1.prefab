@@ -54,6 +54,8 @@ MonoBehaviour:
   distanciaAlObjetivo: 0.5
   animator: {fileID: 6884563514621897108}
   "PiezaCa\xF1onPrefab": {fileID: 5533098276997538225, guid: 12ba4ca55e4db464cadbe276255e5300, type: 3}
+  efectoExplosion: {fileID: 4487766158467488113, guid: 95f0af5ad9b0ae44ead206ef88dd86e7, type: 3}
+  efectoDestello: {fileID: 3937646882799579496, guid: 65b3df8a83143114e8f2d03c04ac4514, type: 3}
   alturaSalto: 4
   duracionSalto: 0.4
   esperaEntreSaltos: 0.7

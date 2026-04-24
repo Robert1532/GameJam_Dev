@@ -9,6 +9,8 @@ public class Boss : MonoBehaviour
     private NavMeshAgent agente;
     public string tagObjetivo = "Sensor";
     public string tagTorreta = "Torreta";
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     [Header("Configuración de Ondas")]
     public GameObject tunderPrefab;
@@ -62,6 +64,9 @@ public class Boss : MonoBehaviour
 
         ConfigurarDificultad(OleadaNmro);
 
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
+
         StartCoroutine(RutinaDisparoMisiles());
     }
 
@@ -110,6 +115,23 @@ public class Boss : MonoBehaviour
         }
 
         return null;
+    }
+
+    public void RecibirDaño(float cantidad)
+    {
+        vida -= cantidad;
+        if (vida <= 0)
+        {
+            Morir();
+        }
+    }
+
+    void Morir()
+    {
+        Instantiate(efectoDestello, transform.position, transform.rotation);
+        Instantiate(efectoExplosion, transform.position, transform.rotation);
+
+        Destroy(gameObject);
     }
 
     IEnumerator SecuenciaTerremoto()

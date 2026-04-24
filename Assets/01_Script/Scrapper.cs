@@ -9,6 +9,8 @@ public class Scrapper : MonoBehaviour
     public string tagObjetivo = "Cañon";
     public Animator animator;
     public GameObject PiezaMotorPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float vida = 100f;
     public float daño = 12f;
@@ -17,6 +19,9 @@ public class Scrapper : MonoBehaviour
     {
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 5f;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -73,6 +78,8 @@ public class Scrapper : MonoBehaviour
     {
         if (PiezaMotorPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaMotorPrefab, transform.position, transform.rotation);
         }
 

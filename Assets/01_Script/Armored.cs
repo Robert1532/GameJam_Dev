@@ -7,6 +7,8 @@ public class Armored : MonoBehaviour
     public string tagObjetivo = "Torreta";
     public Animator animator;
     public GameObject PiezaSensorPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float rangoAtaque = 1f;
     public float vida = 150f;
@@ -17,6 +19,9 @@ public class Armored : MonoBehaviour
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 2.5f;
         agente.stoppingDistance = rangoAtaque;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -76,6 +81,8 @@ public class Armored : MonoBehaviour
     {
         if (PiezaSensorPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
         }
 

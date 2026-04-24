@@ -54,6 +54,8 @@ MonoBehaviour:
   tunderPoint: {fileID: 8040824344082834875}
   animator: {fileID: 5048196330269385913}
   PiezaSensorPrefab: {fileID: 2721435885093003892, guid: 0655b7eb2ff823f4f85ad225e4ad6b8f, type: 3}
+  efectoExplosion: {fileID: 3937646882799579496, guid: 65b3df8a83143114e8f2d03c04ac4514, type: 3}
+  efectoDestello: {fileID: 4487766158467488113, guid: 95f0af5ad9b0ae44ead206ef88dd86e7, type: 3}
   vida: 100
   "da\xF1o": 7
 --- !u!33 &9008818723234156097

@@ -8,6 +8,8 @@ public class Rusher : MonoBehaviour
     public ParticleSystem efecto;
     public Animator animator;
     public GameObject PiezaMotorPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float amplitud = 10f;
     public float frecuencia = 1.2f;
@@ -29,6 +31,9 @@ public class Rusher : MonoBehaviour
         agente.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
 
         tiempoSiguienteCambio = Time.time + (1f / frecuencia);
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -122,6 +127,8 @@ public class Rusher : MonoBehaviour
 
         if (PiezaMotorPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaMotorPrefab, transform.position, Quaternion.identity);
         }
 

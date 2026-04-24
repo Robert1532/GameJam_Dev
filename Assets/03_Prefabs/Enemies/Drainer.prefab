@@ -53,6 +53,8 @@ MonoBehaviour:
   velocidad: 2.5
   animator: {fileID: 5020468820463670310}
   "PiezaCa\xF1onPrefab": {fileID: 5533098276997538225, guid: 12ba4ca55e4db464cadbe276255e5300, type: 3}
+  efectoExplosion: {fileID: 3937646882799579496, guid: 65b3df8a83143114e8f2d03c04ac4514, type: 3}
+  efectoDestello: {fileID: 4487766158467488113, guid: 95f0af5ad9b0ae44ead206ef88dd86e7, type: 3}
   vida: 70
   "da\xF1o": 18
 --- !u!33 &7577181570446799424
