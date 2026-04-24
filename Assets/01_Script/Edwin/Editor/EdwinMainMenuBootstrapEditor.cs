@@ -11,12 +11,13 @@ public sealed class EdwinMainMenuBootstrapEditor : UnityEditor.Editor
 
         EditorGUILayout.Space();
         EditorGUILayout.HelpBox(
-            "Guarda Canvas + fondo + botón en Edwin.unity para verlos en el editor sin Play. " +
-            "Abre la escena Edwin antes de pulsar.",
+            "Bake: guarda Edwin.unity sin borrar MainMenu_Root (posiciones, hijos extra del START, CREDITS, etc.). " +
+            "Sincroniza referencias del bootstrap (audio, fuente título) y sprites por ruta en Background, TitleImage y el Image del botón llamado StartButton. " +
+            "Reconstrucción completa (destructiva): menú Edwin → Build Main Menu In Edwin Scene.",
             MessageType.Info);
 
         if (GUILayout.Button("Bake: guardar menú en Edwin.unity"))
-            EdwinMainMenuSceneBuilder.BuildFromMenu();
+            EdwinMainMenuSceneBuilder.BakePreserveMenuInEdwinScene();
     }
 }
 #endif
