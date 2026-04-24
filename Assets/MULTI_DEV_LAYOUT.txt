@@ -1,0 +1,4 @@
+Multi-developer layout (4 devs: Edwin, Alex, Robert, Main)
+- Per developer: NN_Category/DeveloperName/ (e.g. 01_Script/Edwin/, 03_Prefabs/Main/).
+- Scenes: 00_Scenes/<Name>.unity is owned by that developer for hierarchy work.
+- Shared code only in 01_Script/Common/ or agreed global paths (Editor/, XR/). Do not edit another dev's folder; integrate via public APIs from your own scripts.
