@@ -1,0 +1,40 @@
+GUIA DE RECUPERACION DE LA ESCENA - LAST MACHINE
+--------------------------------------------------
+
+¡Hola! Como tu computadora se apagó y se perdió la escena, he creado un "Script Mágico" que reconstruye absolutamente todo en 1 solo clic. 
+
+Sigue estos 3 simples pasos para recuperar tu juego:
+
+PASO 1: ABRIR UNITY
+1. Abre tu proyecto "GameJam_Dev" en Unity.
+2. Abre la escena "Main" (o crea una escena nueva vacía si la anterior desapareció).
+
+PASO 2: EJECUTAR EL SCRIPT DE AUTO-ARMADO
+1. En la parte superior de la ventana de Unity, busca el menú principal (donde dice File, Edit, Assets, GameObject...).
+2. Verás que apareció un menú nuevo llamado "Tools".
+3. Haz clic en: Tools -> Last Machine -> Auto Setup Scene.
+4. ¡Y LISTO! En un instante verás cómo aparece el suelo, las 4 torretas con sus modelos 3D, el Jugador, y toda la Interfaz de Usuario (Canvas).
+
+PASO 3: JUGAR Y PROBAR
+1. Haz clic en el botón de "Play" (▶️) arriba al centro.
+2. Comprueba que todo funciona:
+   - Los radares deben estar girando.
+   - El contador de oleadas debe aparecer arriba a la derecha.
+   - Si te acercas a una torreta, el panel de estado aparecerá abajo a la izquierda.
+   - Las torretas se irán degradando con el tiempo (simulando el ataque de la oleada).
+   - Usa E+1, E+2 o E+3 para reparar los componentes.
+
+¿QUÉ HIZO EL SCRIPT EXACTAMENTE?
+Para tu conocimiento, el script automatizó más de 30 pasos manuales:
+- Creó los Tags "Player" y "Enemy", y el Layer "Turret".
+- Acomodó la cámara principal en vista "Top-Down" (desde arriba).
+- Buscó tus modelos 3D (baseTorretaSano, motor, radar, Torreta) y los armó en la jerarquía correcta para las 4 direcciones (Norte, Sur, Este, Oeste).
+- Asignó todos tus scripts (TurretController, TurretAnimator, etc.) a las torretas.
+- Creó el prefab del proyectil.
+- Generó al jugador con su sistema de movimiento e inventario de piezas.
+- Instanció el GameSystems con el GameManager y WaveManager.
+- Generó el HUDBuilder que dibuja la interfaz gráfica automáticamente.
+
+Nota: Si por alguna razón quieres volver a generar la escena desde cero en el futuro, simplemente borra los objetos de la jerarquía y vuelve a darle clic a "Auto Setup Scene".
+
+¡Mucho éxito en la GameJam!

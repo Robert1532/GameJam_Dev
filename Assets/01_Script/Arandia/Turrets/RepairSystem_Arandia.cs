@@ -76,15 +76,15 @@ namespace LastMachine.Arandia
             if (ePressed)
             {
                 if (num1Down)
-                    StartRepair(currentTurret.sensor, 0);
+                    StartRepair(currentTurret.sensor);
                 else if (num2Down)
-                    StartRepair(currentTurret.canon, 1);
+                    StartRepair(currentTurret.canon);
                 else if (num3Down)
-                    StartRepair(currentTurret.motor, 2);
+                    StartRepair(currentTurret.motor);
             }
         }
 
-        private void StartRepair(TurretComponent_Arandia component, int slot)
+        public void StartRepair(TurretComponent_Arandia component)
         {
             if (component == null) return;
 
