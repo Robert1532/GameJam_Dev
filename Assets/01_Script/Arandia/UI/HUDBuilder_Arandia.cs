@@ -158,7 +158,14 @@ namespace LastMachine.Arandia
             go.transform.SetParent(transform);
             canvas = go.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            go.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            
+            // Ajustamos a 1280x720 para que los elementos se vean más grandes por defecto
+            CanvasScaler cs = go.AddComponent<CanvasScaler>();
+            cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            cs.referenceResolution = new Vector2(1280, 720);
+            cs.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            cs.matchWidthOrHeight = 0.5f;
+
             go.AddComponent<GraphicRaycaster>();
         }
 
@@ -167,57 +174,87 @@ namespace LastMachine.Arandia
             promptOverlay = CreatePanel(canvas.transform, "Prompt", new Vector2(0.5f, 0.2f), new Vector2(0.5f, 0.2f), Vector2.zero, new Vector2(400, 60), new Color(0,0,0,0));
             TextMeshProUGUI t = CreateText(promptOverlay.transform, "T", Vector2.zero, new Vector2(400, 60), "[E] ACCEDER A TORRETA", 28, greenOK, FontStyles.Bold);
             t.alignment = TextAlignmentOptions.Center;
+            promptOverlay.SetActive(false);
         }
+
+        [Header("Iconos de Componentes")]
+        public Sprite sensorIcon;
+        public Sprite canonIcon;
+        public Sprite motorIcon;
 
         private void BuildTurretPanel()
         {
-            // Cambiamos el pivote a (0, 0.5) para que el panel crezca hacia la derecha desde el borde
-            turretPanel = CreatePanel(canvas.transform, "TurretPanel", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(20, 0), new Vector2(400, 480), bgDark);
+            turretPanel = CreatePanel(canvas.transform, "TurretPanel", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(30, 0), new Vector2(450, 560), bgDark);
             RectTransform rt = turretPanel.GetComponent<RectTransform>();
             rt.pivot = new Vector2(0, 0.5f);
             
             AddOutline(turretPanel, borderBlue, 4);
-
-            turretNameLabel = CreateText(turretPanel.transform, "Title", new Vector2(20, -20), new Vector2(360, 40), "SISTEMA DE TORRETA", 22, textWhite, FontStyles.Bold);
+            turretNameLabel = CreateText(turretPanel.transform, "Title", new Vector2(25, -20), new Vector2(400, 40), "SISTEMA DE MANTENIMIENTO", 18, textWhite, FontStyles.Bold);
             
             float y = -80;
-            string[] names = { "SISTEMA SENSOR", "CAÑÓN PRINCIPAL", "NÚCLEO MOTOR" };
+            string[] names = { "SENSOR", "CAÑÓN", "MOTOR" };
+            Sprite[] icons = { sensorIcon, canonIcon, motorIcon };
+            
             for (int i = 0; i < 3; i++)
             {
-                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(360, 65), new Color(0.1f, 0.15f, 0.2f));
+                int index = i;
+                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(410, 95), new Color(0.12f, 0.18f, 0.25f));
                 RectTransform boxRT = box.GetComponent<RectTransform>();
                 boxRT.pivot = new Vector2(0, 1);
                 
                 compIconBorders[i] = box.GetComponent<Image>();
                 AddOutline(box, greenOK, 2);
                 
-                CreateText(box.transform, "L", new Vector2(10, -5), new Vector2(340, 25), names[i], 15, textWhite, FontStyles.Bold);
-                compStatusText[i] = CreateText(box.transform, "S", new Vector2(10, -35), new Vector2(340, 25), "OPERATIVO - 100%", 13, greenOK, FontStyles.Normal);
-                y -= 85;
+                // ICONO (Bien pegado a la izquierda y centrado verticalmente)
+                if (icons[i] != null)
+                {
+                    GameObject iconGo = new GameObject("Icon");
+                    iconGo.transform.SetParent(box.transform);
+                    Image iconImg = iconGo.AddComponent<Image>();
+                    iconImg.sprite = icons[i];
+                    
+                    RectTransform iconRT = iconGo.GetComponent<RectTransform>();
+                    iconRT.pivot = new Vector2(0, 0.5f);
+                    iconRT.anchorMin = new Vector2(0, 0.5f);
+                    iconRT.anchorMax = new Vector2(0, 0.5f);
+                    iconRT.anchoredPosition = new Vector2(15, 0); // 15 píxeles desde la izquierda
+                    iconRT.sizeDelta = new Vector2(65, 65);
+                }
+
+                // TEXTO (Más a la derecha para no tocar el icono)
+                float textX = icons[i] != null ? 95 : 20;
+                CreateText(box.transform, "L", new Vector2(textX, -20), new Vector2(160, 25), names[i], 15, textWhite, FontStyles.Bold);
+                compStatusText[i] = CreateText(box.transform, "S", new Vector2(textX, -50), new Vector2(160, 25), "ESTADO: 100%", 12, greenOK, FontStyles.Normal);
+                
+                // BOTÓN REPARAR (A la derecha)
+                Button btn; TextMeshProUGUI txt;
+                CreateButton(box.transform, "Fix"+i, new Vector2(270, -22), new Vector2(125, 50), borderBlue, "REPARAR", out btn, out txt);
+                RectTransform btnRT = btn.GetComponent<RectTransform>();
+                btnRT.pivot = new Vector2(0, 1);
+                txt.fontSize = 13;
+                btn.onClick.AddListener(() => {
+                    if (activeTurret != null && repairSystem != null) {
+                        TurretComponent_Arandia comp = (index == 0) ? activeTurret.sensor : (index == 1 ? activeTurret.canon : activeTurret.motor);
+                        repairSystem.StartRepair(comp);
+                    }
+                });
+
+                y -= 110;
             }
 
-            CreateButton(turretPanel.transform, "RepBtn", new Vector2(20, -345), new Vector2(360, 50), borderBlue, "REPARAR COMPONENTE CRÍTICO", out repairCriticalBtn, out repairCriticalText);
-            RectTransform btnRT = repairCriticalBtn.GetComponent<RectTransform>();
-            btnRT.pivot = new Vector2(0, 1);
+            CreateButton(turretPanel.transform, "RepAllBtn", new Vector2(20, -380), new Vector2(400, 50), borderBlue, "REPARAR COMPONENTE CRÍTICO", out repairCriticalBtn, out repairCriticalText);
+            repairCriticalBtn.GetComponent<RectTransform>().pivot = new Vector2(0, 1);
+            repairCriticalText.fontSize = 14;
             
-            repairCriticalBtn.onClick.AddListener(() => {
-                if (activeTurret != null && repairSystem != null) {
-                    TurretComponent_Arandia[] comps = { activeTurret.sensor, activeTurret.canon, activeTurret.motor };
-                    TurretComponent_Arandia worst = comps[0];
-                    foreach(var c in comps) if(c.HPPercent < worst.HPPercent) worst = c;
-                    repairSystem.StartRepair(worst);
-                }
-            });
-
-            // NUEVO: BOTÓN PARA PROBAR (SIMULAR DAÑO)
             Button simBtn; TextMeshProUGUI simTxt;
-            CreateButton(turretPanel.transform, "SimBtn", new Vector2(20, -405), new Vector2(360, 40), new Color(0.3f, 0.1f, 0.1f), "SIMULAR DAÑO (DEBUG)", out simBtn, out simTxt);
+            CreateButton(turretPanel.transform, "SimBtn", new Vector2(20, -440), new Vector2(400, 35), new Color(0.3f, 0.1f, 0.1f), "SIMULAR DAÑO (DEBUG)", out simBtn, out simTxt);
             simBtn.GetComponent<RectTransform>().pivot = new Vector2(0, 1);
+            simTxt.fontSize = 11;
             simBtn.onClick.AddListener(() => {
                 if (activeTurret != null) {
                     activeTurret.sensor.TakeDamage(30);
-                    activeTurret.canon.TakeDamage(20);
-                    activeTurret.motor.TakeDamage(10);
+                    activeTurret.canon.TakeDamage(25);
+                    activeTurret.motor.TakeDamage(20);
                 }
             });
         }
