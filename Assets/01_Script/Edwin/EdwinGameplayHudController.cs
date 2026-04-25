@@ -114,7 +114,11 @@ public sealed class EdwinGameplayHudController : MonoBehaviour
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
-            Canvas.ForceUpdateCanvases();
+        {
+            // Avoid calling ForceUpdateCanvases during layout callbacks (it internally uses SendMessage).
+            // Defer to the next editor tick.
+            EditorApplication.delayCall += Canvas.ForceUpdateCanvases;
+        }
 #endif
     }
 

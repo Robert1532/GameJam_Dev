@@ -15,8 +15,11 @@ public class Armored : MonoBehaviour
     void Start()
     {
         agente = GetComponent<NavMeshAgent>();
-        agente.speed = 2.5f;
-        agente.stoppingDistance = rangoAtaque;
+        if (agente != null)
+        {
+            agente.speed = 2.5f;
+            agente.stoppingDistance = rangoAtaque;
+        }
     }
 
     void Update()
@@ -31,11 +34,13 @@ public class Armored : MonoBehaviour
 
         if (objetivoCercano != null)
         {
-            agente.SetDestination(objetivoCercano.transform.position);
+            // Evita el error: SetDestination solo funciona si el agente está activo y sobre NavMesh.
+            if (agente != null && agente.enabled && agente.isOnNavMesh && gameObject.activeInHierarchy)
+                agente.SetDestination(objetivoCercano.transform.position);
 
             float distancia = Vector3.Distance(transform.position, objetivoCercano.transform.position);
 
-            if (!agente.pathPending && agente.remainingDistance <= agente.stoppingDistance + 0.5f)
+            if (agente != null && !agente.pathPending && agente.remainingDistance <= agente.stoppingDistance + 0.5f)
             {
                 if (animator != null)
                 {
@@ -49,7 +54,7 @@ public class Armored : MonoBehaviour
                 if (animator != null)
                 {
                     animator.SetBool("IsAttack", false);
-                    animator.SetBool("IsWalk", agente.velocity.magnitude > 0.1f);
+                    animator.SetBool("IsWalk", agente != null && agente.velocity.magnitude > 0.1f);
                 }
             }
         }
