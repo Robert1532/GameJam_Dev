@@ -11,20 +11,38 @@ namespace LastMachine.Arandia
 {
     public class HUDBuilder_Arandia : MonoBehaviour
     {
+        public static HUDBuilder_Arandia Instance;
+
         [Header("Referencias - Arandia")]
-        public TurretController_Arandia[] turrets;
+        public List<TurretController_Arandia> turrets = new List<TurretController_Arandia>();
         public RepairSystem_Arandia repairSystem;
         public WaveManager_Arandia waveManager;
         public GameManager_Arandia gameManager;
 
+        void Awake()
+        {
+            if (Instance == null) 
+            {
+                Instance = this;
+                Debug.Log($"<color=cyan>[Singleton] HUD Instance asignada al objeto: {gameObject.name}</color>");
+            }
+            else if (Instance != this)
+            {
+                Debug.LogWarning($"<color=red>[Singleton] ¡CUIDADO! Hay un HUD duplicado en el objeto: {gameObject.name}. DEBES BORRARLO.</color>");
+            }
+        }
+
         // Colores del tema LAST MACHINE (Pixel-Art Retro de Guerra)
-        private Color bgDark      = new Color(0.05f, 0.07f, 0.1f, 0.95f);
-        private Color borderBlue  = new Color(0.15f, 0.5f, 0.9f, 1f);
-        private Color greenOK     = new Color(0f, 1f, 0.4f, 1f);
+        private Color bgDark      = new Color(0.05f, 0.08f, 0.12f, 0.98f);
+        private Color borderBlue  = new Color(0f, 0.8f, 1f, 1f); // Cian Neón
+        private Color greenOK     = new Color(0.2f, 1f, 0.8f, 1f);
         private Color orangeWarn  = new Color(1f, 0.6f, 0f, 1f);
-        private Color redBad      = new Color(1f, 0.1f, 0.2f, 1f);
-        private Color textWhite   = new Color(0.95f, 1f, 0.95f);
-        private Color textGray    = new Color(0.54f, 0.55f, 0.57f);
+        private Color redBad      = new Color(1f, 0.2f, 0.2f, 1f);
+        private Color textWhite   = new Color(0.9f, 0.95f, 1f, 1f);
+        private Color textGray    = new Color(0.6f, 0.7f, 0.8f);
+
+        [Header("Estética Personalizada")]
+        public Sprite panelBackground;
 
         // Referencias generadas
         private Canvas canvas;
@@ -141,7 +159,7 @@ namespace LastMachine.Arandia
         private void BuildCanvas()
         {
             // Asegurar que existe un EventSystem para los clics
-            if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 GameObject es = new GameObject("EventSystem");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
@@ -188,6 +206,15 @@ namespace LastMachine.Arandia
             RectTransform rt = turretPanel.GetComponent<RectTransform>();
             rt.pivot = new Vector2(0, 0.5f);
             
+            // Si hay fondo personalizado, usarlo
+            if (panelBackground != null)
+            {
+                Image img = turretPanel.GetComponent<Image>();
+                img.sprite = panelBackground;
+                img.type = Image.Type.Simple;
+                img.color = Color.white;
+            }
+            
             AddOutline(turretPanel, borderBlue, 4);
             turretNameLabel = CreateText(turretPanel.transform, "Title", new Vector2(25, -20), new Vector2(400, 40), "SISTEMA DE MANTENIMIENTO", 18, textWhite, FontStyles.Bold);
             
@@ -198,7 +225,7 @@ namespace LastMachine.Arandia
             for (int i = 0; i < 3; i++)
             {
                 int index = i;
-                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(410, 95), new Color(0.12f, 0.18f, 0.25f));
+                GameObject box = CreatePanel(turretPanel.transform, "Box"+i, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, y), new Vector2(410, 95), new Color(0.1f, 0.15f, 0.2f, 0.4f));
                 RectTransform boxRT = box.GetComponent<RectTransform>();
                 boxRT.pivot = new Vector2(0, 1);
                 
@@ -257,6 +284,8 @@ namespace LastMachine.Arandia
                     activeTurret.motor.TakeDamage(20);
                 }
             });
+
+            turretPanel.SetActive(false);
         }
 
         private void BuildWaveInfoPanel()
@@ -292,24 +321,72 @@ namespace LastMachine.Arandia
             victoryScore.alignment = TextAlignmentOptions.Center;
         }
 
-        private void OnEnterTurret(TurretController_Arandia t) { activeTurret = t; promptOverlay.SetActive(true); }
-        private void OnExitTurret(TurretController_Arandia t) { 
-            if(activeTurret == t) { activeTurret = null; promptOverlay.SetActive(false); turretPanel.SetActive(false); isShowingTurretHUD = false; }
+        public void ShowPrompt()
+        {
+            if (promptOverlay != null) promptOverlay.SetActive(true);
         }
+
+        public void HidePrompt()
+        {
+            if (promptOverlay != null) promptOverlay.SetActive(false);
+            HideTurretPanel(); // Si se aleja, cerramos todo
+        }
+
+        public void ShowTurretPanel(TurretController_Arandia t)
+        {
+            activeTurret = t;
+            if (turretPanel != null) 
+            {
+                turretPanel.SetActive(true);
+                Debug.Log($"[HUD] Panel de mantenimiento ACTIVADO para {t.turretName}");
+            }
+            else
+            {
+                Debug.LogError("[HUD] ERROR: El panel de mantenimiento (turretPanel) es NULL");
+            }
+
+            if (promptOverlay != null) promptOverlay.SetActive(false);
+            isShowingTurretHUD = true;
+
+            // Liberar el raton
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+
+            RefreshTurretPanel();
+        }
+
+        public void HideTurretPanel()
+        {
+            if (turretPanel != null) turretPanel.SetActive(false);
+            activeTurret = null;
+            isShowingTurretHUD = false;
+
+            // Volver a esconder el raton para jugar
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        private void OnEnterTurret(TurretController_Arandia t) { ShowTurretPanel(t); }
+        private void OnExitTurret(TurretController_Arandia t) { HideTurretPanel(); }
         private void ShowVictory() { victoryPanel.SetActive(true); }
 
         private void RefreshTurretPanel()
         {
             if (!isShowingTurretHUD || activeTurret == null) return;
 
+            // Actualizar nombre
+            if (turretNameLabel != null) turretNameLabel.text = activeTurret.turretName;
+
             TurretComponent_Arandia[] comps = { activeTurret.sensor, activeTurret.canon, activeTurret.motor };
             for (int i = 0; i < 3; i++)
             {
+                if (comps[i] == null) continue;
+
                 float pct = comps[i].HPPercent;
                 Color c = pct > 0.5f ? greenOK : (pct > 0.2f ? orangeWarn : redBad);
                 compStatusText[i].text = $"ESTADO: {Mathf.RoundToInt(pct*100)}% - {(pct > 0.5f ? "OPTIMAL" : (pct > 0.2f ? "CRÍTICO" : "FALLO"))}";
                 compStatusText[i].color = c;
-                compIconBorders[i].GetComponent<Outline>().effectColor = c;
+                compIconBorders[i].color = c;
             }
         }
 

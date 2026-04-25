@@ -3,6 +3,9 @@
 // Descripcion: Controla la torreta completa (3 componentes), detecta enemigos y dispara
 
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,23 +24,23 @@ namespace LastMachine.Arandia
         public TurretComponent_Arandia canon;
         public TurretComponent_Arandia motor;
 
-        [Header("Configuracion de Disparo")]
-        public Transform firePoint;
+        [Header("Configuracion de Combate")]
+        public float baseFireRate = 1f;
+        public float detectionRange = 30f;
+        public float baseDamage = 10f;
         public GameObject projectilePrefab;
-        public float baseFireRate = 1f;      // disparos por segundo
-        public float detectionRange = 10f;
-        public float baseDamage = 25f;
+        public Transform firePoint;
+
+        [Header("Visuales")]
+        public TurretAnimator_Arandia turretAnimator;
 
         [Header("Estado")]
-        [SerializeField] private bool isActive = true;
+        private float fireTimer = 0;
+        private bool isActive = true;
         [SerializeField] private bool playerInRange = false;
-
-        [Header("Animacion")]
-        public TurretAnimator_Arandia turretAnimator;
 
         // Referencias internas
         private Transform currentTarget;
-        private float fireTimer;
         private List<Transform> enemiesInRange = new List<Transform>();
 
         // Eventos
@@ -52,6 +55,15 @@ namespace LastMachine.Arandia
 
         void Start()
         {
+            // Registrarse en el HUD automaticamente si no estamos en la lista
+            if (HUDBuilder_Arandia.Instance != null)
+            {
+                if (!HUDBuilder_Arandia.Instance.turrets.Contains(this))
+                {
+                    HUDBuilder_Arandia.Instance.turrets.Add(this);
+                    Debug.Log($"<color=green>[Auto-Registro] {turretName} se ha unido al HUD Manager</color>");
+                }
+            }
             // FORZAR QUE NINGUNA PIEZA SE MUEVA POR FISICAS (incluyendo hijos)
             Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
             foreach (Rigidbody rb in rbs)
@@ -73,15 +85,45 @@ namespace LastMachine.Arandia
             if (!isActive) return;
 
             CleanEnemyList();
-            UpdateTarget();
-            HandleFiring();
-            HandleAiming();
-        }
 
-        private void HandleAiming()
-        {
-            if (turretAnimator == null || currentTarget == null) return;
-            turretAnimator.AimAt(currentTarget.position);
+            // INTERACCIÓN CON JUGADOR
+            if (playerInRange && IsInteractPressed())
+            {
+                Debug.Log($"[Interaccion] Abriendo HUD de {turretName}");
+                HUDBuilder_Arandia.Instance?.ShowTurretPanel(this);
+            }
+
+            // LÓGICA DEL SENSOR (APUNTADO)
+            if (!sensor.IsBroken)
+            {
+                UpdateTarget();
+                if (currentTarget != null && turretAnimator != null)
+                {
+                    turretAnimator.AimAt(currentTarget.position);
+                }
+            }
+            else
+            {
+                // FALLO DEL SENSOR
+                if (turretAnimator != null)
+                {
+                    Vector3 randomPos = transform.position + transform.forward * 10f + transform.right * Mathf.Sin(Time.time * 2f) * 5f;
+                    turretAnimator.AimAt(randomPos);
+                }
+            }
+
+            // LÓGICA DEL MOTOR Y CAÑÓN (DISPARO)
+            if (!canon.IsBroken)
+            {
+                float fireRate = GetAdjustedFireRate();
+
+                fireTimer += Time.deltaTime;
+                if (fireTimer >= 1f / fireRate && currentTarget != null)
+                {
+                    Fire();
+                    fireTimer = 0;
+                }
+            }
         }
 
         private void SubscribeToComponents()
@@ -91,44 +133,39 @@ namespace LastMachine.Arandia
             motor.OnComponentBroken += OnMotorBroken;
         }
 
+        private static bool IsInteractPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var kb = Keyboard.current;
+            return kb != null && kb.eKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.E);
+#endif
+        }
+
         private void UpdateTarget()
         {
-            if (sensor.IsBroken)
-            {
-                // Sensor roto: dispara en direccion aleatoria
-                if (enemiesInRange.Count > 0)
-                    currentTarget = enemiesInRange[Random.Range(0, enemiesInRange.Count)];
-                return;
-            }
+            if (sensor.IsBroken) return;
+            if (detectionRange <= 0) detectionRange = 30f; // Forzar rango si está en 0
 
-            // Sensor OK: apunta al enemigo mas cercano
             float closestDist = float.MaxValue;
             currentTarget = null;
 
-            foreach (Transform enemy in enemiesInRange)
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange);
+            foreach (var hit in hitColliders)
             {
-                if (enemy == null) continue;
-                float dist = Vector3.Distance(transform.position, enemy.position);
-                if (dist < closestDist)
+                if (hit.CompareTag("Enemy"))
                 {
-                    closestDist = dist;
-                    currentTarget = enemy;
+                    float dist = Vector3.Distance(transform.position, hit.transform.position);
+                    if (dist < closestDist)
+                    {
+                        closestDist = dist;
+                        currentTarget = hit.transform;
+                    }
                 }
             }
-        }
-
-        private void HandleFiring()
-        {
-            if (canon.IsBroken || currentTarget == null) return;
-
-            float fireRate = GetAdjustedFireRate();
-            fireTimer += Time.deltaTime;
-
-            if (fireTimer >= 1f / fireRate)
-            {
-                fireTimer = 0f;
-                Fire();
-            }
+            
+            if (currentTarget != null) Debug.Log($"[Radar] {turretName} ha fijado objetivo: {currentTarget.name}");
         }
 
         private void Fire()
@@ -219,7 +256,14 @@ namespace LastMachine.Arandia
             if (other.CompareTag("Player"))
             {
                 playerInRange = true;
-                OnPlayerEnterRange?.Invoke(this);
+
+                RepairSystem_Arandia repair = other.GetComponent<RepairSystem_Arandia>();
+                if (repair != null)
+                {
+                    repair.SetCurrentTurret(this);
+                }
+
+                HUDBuilder_Arandia.Instance?.ShowPrompt();
             }
         }
 
@@ -228,7 +272,14 @@ namespace LastMachine.Arandia
             if (other.CompareTag("Player"))
             {
                 playerInRange = false;
-                OnPlayerExitRange?.Invoke(this);
+
+                RepairSystem_Arandia repair = other.GetComponent<RepairSystem_Arandia>();
+                if (repair != null)
+                {
+                    repair.ClearCurrentTurret();
+                }
+
+                HUDBuilder_Arandia.Instance?.HidePrompt();
             }
         }
 

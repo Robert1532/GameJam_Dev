@@ -12,7 +12,7 @@ public class Armored : MonoBehaviour
 
     public float rangoAtaque = 1f;
     public float vida = 150f;
-    public float daño = 8f;
+    public float daï¿½o = 8f;
 
     void Start()
     {
@@ -36,11 +36,13 @@ public class Armored : MonoBehaviour
 
         if (objetivoCercano != null)
         {
-            agente.SetDestination(objetivoCercano.transform.position);
+            // Evita el error: SetDestination solo funciona si el agente estï¿½ activo y sobre NavMesh.
+            if (agente != null && agente.enabled && agente.isOnNavMesh && gameObject.activeInHierarchy)
+                agente.SetDestination(objetivoCercano.transform.position);
 
             float distancia = Vector3.Distance(transform.position, objetivoCercano.transform.position);
 
-            if (!agente.pathPending && agente.remainingDistance <= agente.stoppingDistance + 0.5f)
+            if (agente != null && !agente.pathPending && agente.remainingDistance <= agente.stoppingDistance + 0.5f)
             {
                 if (animator != null)
                 {
@@ -54,7 +56,7 @@ public class Armored : MonoBehaviour
                 if (animator != null)
                 {
                     animator.SetBool("IsAttack", false);
-                    animator.SetBool("IsWalk", agente.velocity.magnitude > 0.1f);
+                    animator.SetBool("IsWalk", agente != null && agente.velocity.magnitude > 0.1f);
                 }
             }
         }
@@ -68,7 +70,7 @@ public class Armored : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
+    public void RecibirDaï¿½o(float cantidad)
     {
         vida -= cantidad;
         if (vida <= 0)

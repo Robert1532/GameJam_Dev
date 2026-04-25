@@ -103,4 +103,17 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
     public void OnPointerDown(PointerEventData eventData) => _pressed = true;
 
     public void OnPointerUp(PointerEventData eventData) => _pressed = false;
+
+    /// <summary>
+    /// Tras cambiar el color del <see cref="Text"/> hijo por código, actualiza el color base del hover.
+    /// </summary>
+    public void SyncBaseTextColorFromLabel()
+    {
+        if (_label == null)
+            _label = GetComponentInChildren<Text>(true);
+        _hasLabel = _label != null;
+        if (_hasLabel)
+            _baseTextColor = _label.color;
+        ApplyTargets(force: true);
+    }
 }

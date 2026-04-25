@@ -9,14 +9,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2168225816845042377}
+  - component: {fileID: 1302720222993016077}
   - component: {fileID: 4308979050238732556}
   - component: {fileID: 7208851917340020189}
+  - component: {fileID: -5301007546585951804}
   - component: {fileID: 3813749914531297999}
   - component: {fileID: 7353704114052296471}
   - component: {fileID: 4652317906216965795}
   m_Layer: 0
   m_Name: Splitter_Padre
-  m_TagString: SplitterP
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -37,6 +39,25 @@ Transform:
   - {fileID: 415699403293855798}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1302720222993016077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3355762508711624358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e6d9051d3bacc44298b1191b4eb007c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
+  enemyType: 1
+  damage: 5
+  attackInterval: 1.5
+  attackRange: 2
+  isAttacking: 0
+  currentTurret: {fileID: 0}
+  targetComponent: {fileID: 0}
 --- !u!114 &4308979050238732556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,6 +91,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3355762508711624358}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &-5301007546585951804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3355762508711624358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d19ed5b3b90879c4ba8faa2e2cb0977f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.EnemyHealth_Arandia
+  maxHealth: 50
 --- !u!23 &3813749914531297999
 MeshRenderer:
   m_ObjectHideFlags: 0

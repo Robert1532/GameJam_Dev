@@ -9,15 +9,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6995312312086663812}
+  - component: {fileID: 1500389276641177844}
   - component: {fileID: 3367417851083239526}
   - component: {fileID: 8920574958759694822}
+  - component: {fileID: -8664720053200417715}
   - component: {fileID: 2023895812207866464}
   - component: {fileID: 4586810803603297516}
   - component: {fileID: 1629796245356895309}
   - component: {fileID: 6225867575769498118}
   m_Layer: 0
   m_Name: Rusher
-  m_TagString: Rusher
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -39,6 +41,25 @@ Transform:
   - {fileID: 7531959389199037391}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1500389276641177844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2014063324903985360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e6d9051d3bacc44298b1191b4eb007c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
+  enemyType: 3
+  damage: 12
+  attackInterval: 1.5
+  attackRange: 5
+  isAttacking: 0
+  currentTurret: {fileID: 0}
+  targetComponent: {fileID: 0}
 --- !u!114 &3367417851083239526
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,7 +72,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86f039c4563e8e7498788b726354f926, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Rusher
-  tagObjetivo: Torreta
+  tagObjetivo: Turret
   efecto: {fileID: 6557108427736754913}
   animator: {fileID: 1797917154466316520}
   PiezaMotorPrefab: {fileID: 299937458609350935, guid: 199fa4b4b507ae94a8a9209eafc74f97, type: 3}
@@ -70,6 +91,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2014063324903985360}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &-8664720053200417715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2014063324903985360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d19ed5b3b90879c4ba8faa2e2cb0977f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.EnemyHealth_Arandia
+  maxHealth: 50
 --- !u!23 &2023895812207866464
 MeshRenderer:
   m_ObjectHideFlags: 0
