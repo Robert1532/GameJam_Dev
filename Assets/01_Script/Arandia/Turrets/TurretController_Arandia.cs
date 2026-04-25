@@ -3,6 +3,9 @@
 // Descripcion: Controla la torreta completa (3 componentes), detecta enemigos y dispara
 
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 
@@ -84,7 +87,7 @@ namespace LastMachine.Arandia
             CleanEnemyList();
 
             // INTERACCIÓN CON JUGADOR
-            if (playerInRange && Input.GetKeyDown(KeyCode.E))
+            if (playerInRange && IsInteractPressed())
             {
                 Debug.Log($"[Interaccion] Abriendo HUD de {turretName}");
                 HUDBuilder_Arandia.Instance?.ShowTurretPanel(this);
@@ -128,6 +131,16 @@ namespace LastMachine.Arandia
             sensor.OnComponentBroken += OnSensorBroken;
             canon.OnComponentBroken += OnCanonBroken;
             motor.OnComponentBroken += OnMotorBroken;
+        }
+
+        private static bool IsInteractPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var kb = Keyboard.current;
+            return kb != null && kb.eKey.wasPressedThisFrame;
+#else
+            return Input.GetKeyDown(KeyCode.E);
+#endif
         }
 
         private void UpdateTarget()
