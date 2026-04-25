@@ -13,29 +13,32 @@ namespace LastMachine.Arandia
     public class WaveManager_Arandia : MonoBehaviour
     {
         [Header("Configuracion de Oleadas - Arandia")]
-        public int totalWaves = 10;              // 10 oleadas = victoria
-        public float waveDuration = 45f;         // segundos por oleada
-        public float truceDuration = 30f;        // segundos de tregua entre oleadas
-        public float waveCountdownTime = 5f;     // cuenta regresiva antes de oleada
+        public int totalWaves = 10;
+        public float waveDuration = 45f;
+        public float truceDuration = 30f;
+        public float waveCountdownTime = 5f;
 
         [Header("Referencias")]
-        public TurretDegradation_Arandia[] turretDegradations; // 4 torretas
+        public TurretDegradation_Arandia[] turretDegradations;
         public GameManager_Arandia gameManager;
 
+        [Header("Spawner de Enemigos")]
+        public EnemySpawner_Arandia enemySpawner;
+
         [Header("UI (opcional)")]
-        public TextMeshProUGUI waveText;         // "OLEADA 3"
-        public TextMeshProUGUI timerText;        // "00:32"
-        public TextMeshProUGUI statusText;       // "TREGUA - Repara tus torretas"
-        public GameObject waveAnnouncementPanel; // Panel que aparece 5 seg
+        public TextMeshProUGUI waveText;
+        public TextMeshProUGUI timerText;
+        public TextMeshProUGUI statusText;
+        public GameObject waveAnnouncementPanel;
 
         // Estado
         [SerializeField] private int currentWave = 0;
         [SerializeField] private bool waveActive = false;
         [SerializeField] private float waveTimer = 0f;
 
-        // Eventos — otros sistemas pueden escuchar
-        public System.Action<int> OnWaveStart;     // oleada numero
-        public System.Action<int> OnWaveEnd;       // oleada numero
+        // Eventos
+        public System.Action<int> OnWaveStart;
+        public System.Action<int> OnWaveEnd;
         public System.Action OnTruceStart;
         public System.Action OnGameWon;
 
@@ -45,60 +48,69 @@ namespace LastMachine.Arandia
 
         void Start()
         {
-            // Empezar con oleada 0 (tutorial)
             StartCoroutine(GameLoop());
         }
 
         private IEnumerator GameLoop()
         {
-            // ─── Oleada 0: Tutorial (60 seg de gracia) ───
+            // Oleada 0 tutorial
             currentWave = 0;
-            ShowStatus("La Fábrica necesita un mecánico.\nMuévete con WASD. Acércate a una torreta y presiona E para reparar.");
+
+            ShowStatus(
+                "La Fábrica necesita un mecánico.\n" +
+                "Muévete con WASD. Acércate a una torreta y presiona E para reparar."
+            );
+
             yield return new WaitForSeconds(10f);
 
-            // ─── Loop principal ───
+            // Loop principal
             for (int wave = 1; wave <= totalWaves; wave++)
             {
-                if (gameManager != null && gameManager.IsGameOver) yield break;
+                if (gameManager != null && gameManager.IsGameOver)
+                    yield break;
 
                 currentWave = wave;
 
-                // Cuenta regresiva
                 yield return StartCoroutine(WaveCountdown(wave));
 
-                // Iniciar oleada
                 StartWave(wave);
 
-                // Esperar duración de oleada
                 waveTimer = 0f;
+
                 while (waveTimer < waveDuration)
                 {
-                    if (gameManager != null && gameManager.IsGameOver) yield break;
+                    if (gameManager != null && gameManager.IsGameOver)
+                        yield break;
+
                     waveTimer += Time.deltaTime;
+
                     UpdateTimerUI();
+
                     yield return null;
                 }
 
-                // Fin de oleada
                 EndWave(wave);
 
-                // ¿Última oleada sobrevivida?
+                // Victoria
                 if (wave >= totalWaves)
                 {
                     OnGameWon?.Invoke();
+
                     ShowStatus("LAST MACHINE OPERATIONAL\n¡Has sobrevivido!");
-                    if (waveText != null) waveText.text = "VICTORIA";
+
+                    if (waveText != null)
+                        waveText.text = "VICTORIA";
+
                     yield break;
                 }
 
-                // Tregua
                 yield return StartCoroutine(TrucePhase());
             }
         }
 
-        // ──────────────────────────────────────────────
-        //  Fases
-        // ──────────────────────────────────────────────
+        // ==================================================
+        // FASES
+        // ==================================================
 
         private IEnumerator WaveCountdown(int wave)
         {
@@ -108,7 +120,10 @@ namespace LastMachine.Arandia
             for (int i = (int)waveCountdownTime; i > 0; i--)
             {
                 ShowStatus($"OLEADA {wave} en {i}...");
-                if (waveText != null) waveText.text = $"OLEADA {wave}";
+
+                if (waveText != null)
+                    waveText.text = $"OLEADA {wave}";
+
                 yield return new WaitForSeconds(1f);
             }
 
@@ -119,16 +134,26 @@ namespace LastMachine.Arandia
         private void StartWave(int wave)
         {
             waveActive = true;
+
             ShowStatus($"OLEADA {wave} — ¡Defiende las torretas!");
 
-            // Activar degradación en todas las torretas
+            // Activar degradación torretas
             foreach (var deg in turretDegradations)
             {
                 if (deg != null)
                     deg.StartDegrading(wave);
             }
 
+            // ===============================
+            // NUEVO: GENERAR ENEMIGOS
+            // ===============================
+            if (enemySpawner != null)
+            {
+                StartCoroutine(enemySpawner.SpawnWave(wave));
+            }
+
             OnWaveStart?.Invoke(wave);
+
             Debug.Log($"[Arandia] === OLEADA {wave} INICIADA ===");
         }
 
@@ -136,7 +161,6 @@ namespace LastMachine.Arandia
         {
             waveActive = false;
 
-            // Pausar degradación
             foreach (var deg in turretDegradations)
             {
                 if (deg != null)
@@ -144,27 +168,34 @@ namespace LastMachine.Arandia
             }
 
             OnWaveEnd?.Invoke(wave);
+
             Debug.Log($"[Arandia] === OLEADA {wave} COMPLETADA ===");
         }
 
         private IEnumerator TrucePhase()
         {
             OnTruceStart?.Invoke();
+
             float truceTimer = truceDuration;
 
             while (truceTimer > 0f)
             {
-                if (gameManager != null && gameManager.IsGameOver) yield break;
-                
+                if (gameManager != null && gameManager.IsGameOver)
+                    yield break;
+
                 truceTimer -= Time.deltaTime;
-                ShowStatus($"TREGUA — Repara tus torretas ({Mathf.CeilToInt(truceTimer)}s)");
+
+                ShowStatus(
+                    $"TREGUA — Repara tus torretas ({Mathf.CeilToInt(truceTimer)}s)"
+                );
+
                 yield return null;
             }
         }
 
-        // ──────────────────────────────────────────────
-        //  UI helpers
-        // ──────────────────────────────────────────────
+        // ==================================================
+        // UI HELPERS
+        // ==================================================
 
         private void ShowStatus(string msg)
         {
@@ -175,9 +206,12 @@ namespace LastMachine.Arandia
         private void UpdateTimerUI()
         {
             if (timerText == null) return;
+
             float remaining = WaveTimeRemaining;
+
             int min = Mathf.FloorToInt(remaining / 60f);
             int sec = Mathf.FloorToInt(remaining % 60f);
+
             timerText.text = $"{min:00}:{sec:00}";
         }
     }

@@ -240,23 +240,32 @@ namespace LastMachine.Arandia
         // Deteccion de jugador para HUD
         private void OnTriggerEnter(Collider other)
         {
-            // Debug para saber qué está tocando la torreta
-            Debug.Log($"[Torreta] Algo ha entrado en el circulo: {other.name} (Tag: {other.tag})");
-
-            if (other.CompareTag("Player") || other.name.Contains("Player") || other.name.Contains("Capsule"))
+            if (other.CompareTag("Player"))
             {
                 playerInRange = true;
-                Debug.Log("[Torreta] ¡JUGADOR DETECTADO! Ahora puedes pulsar E");
+
+                RepairSystem_Arandia repair = other.GetComponent<RepairSystem_Arandia>();
+                if (repair != null)
+                {
+                    repair.SetCurrentTurret(this);
+                }
+
                 HUDBuilder_Arandia.Instance?.ShowPrompt();
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.CompareTag("Player") || other.name.Contains("Player") || other.name.Contains("Capsule"))
+            if (other.CompareTag("Player"))
             {
                 playerInRange = false;
-                Debug.Log("[Torreta] Jugador ha salido del rango");
+
+                RepairSystem_Arandia repair = other.GetComponent<RepairSystem_Arandia>();
+                if (repair != null)
+                {
+                    repair.ClearCurrentTurret();
+                }
+
                 HUDBuilder_Arandia.Instance?.HidePrompt();
             }
         }

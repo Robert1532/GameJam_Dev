@@ -2,22 +2,24 @@ using UnityEngine;
 
 namespace LastMachine.Arandia
 {
-    public class EnemyHealth_Arandia : MonoBehaviour
+    public class EnemyHealth_Arandia : MonoBehaviour, IDamageable
     {
-        public int maxHealth = 50;
-        private int currentHealth;
+        public float maxHealth = 50f;
+        private float currentHealth;
 
         void Start()
         {
             currentHealth = maxHealth;
         }
 
-        public void TakeDamage(int damage)
+        // 🔥 ESTE ES EL MÉTODO QUE TU PROYECTIL USA
+        public void TakeDamage(float damage)
         {
             currentHealth -= damage;
-            Debug.Log("Enemigo herido: " + currentHealth + " HP");
 
-            if (currentHealth <= 0)
+            Debug.Log($"💥 {gameObject.name} recibió {damage} daño. HP: {currentHealth}");
+
+            if (currentHealth <= 0f)
             {
                 Die();
             }
@@ -25,7 +27,7 @@ namespace LastMachine.Arandia
 
         void Die()
         {
-            Debug.Log("¡Enemigo DESTRUIDO!");
+            Debug.Log($"🔥 {gameObject.name} DESTRUIDO");
             Destroy(gameObject);
         }
     }
