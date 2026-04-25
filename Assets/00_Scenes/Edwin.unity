@@ -1507,7 +1507,7 @@ MonoBehaviour:
   menuMusicVolume: 0.2
   startClickVolume: 1
   startHoverVolume: 1
-  nextSceneName: Main
+  nextSceneName: Robert
 --- !u!4 &1572403273
 Transform:
   m_ObjectHideFlags: 0
