@@ -9,15 +9,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7987637794702006198}
+  - component: {fileID: 1541027715273716601}
   - component: {fileID: 6344062342858589795}
   - component: {fileID: 806032735498384244}
+  - component: {fileID: 7366123650730746200}
   - component: {fileID: 1236416113849551487}
   - component: {fileID: 7718669448257936115}
   - component: {fileID: -2130354258288013797}
   - component: {fileID: 2188958118085385678}
   m_Layer: 0
   m_Name: Splitter1 (1) 1
-  m_TagString: SplitterH
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -38,6 +40,25 @@ Transform:
   - {fileID: 678582150640628718}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1541027715273716601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2422760133389368183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e6d9051d3bacc44298b1191b4eb007c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
+  enemyType: 1
+  damage: 3
+  attackInterval: 1.5
+  attackRange: 2
+  isAttacking: 0
+  currentTurret: {fileID: 0}
+  targetComponent: {fileID: 0}
 --- !u!114 &6344062342858589795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,6 +88,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2422760133389368183}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &7366123650730746200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2422760133389368183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d19ed5b3b90879c4ba8faa2e2cb0977f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.EnemyHealth_Arandia
+  maxHealth: 50
 --- !u!23 &1236416113849551487
 MeshRenderer:
   m_ObjectHideFlags: 0

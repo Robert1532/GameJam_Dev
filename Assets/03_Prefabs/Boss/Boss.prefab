@@ -40,6 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7474970892607482353}
+  - component: {fileID: -9102884151922493575}
   - component: {fileID: 5656413079375536373}
   - component: {fileID: 1136772935201509278}
   - component: {fileID: 168346738078045184}
@@ -73,6 +74,25 @@ Transform:
   - {fileID: 3684870373411909392}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-9102884151922493575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386873034120219603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e6d9051d3bacc44298b1191b4eb007c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
+  enemyType: 3
+  damage: 20
+  attackInterval: 1.5
+  attackRange: 12
+  isAttacking: 0
+  currentTurret: {fileID: 0}
+  targetComponent: {fileID: 0}
 --- !u!114 &5656413079375536373
 MonoBehaviour:
   m_ObjectHideFlags: 0
