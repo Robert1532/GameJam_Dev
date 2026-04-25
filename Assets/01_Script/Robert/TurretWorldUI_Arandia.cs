@@ -9,15 +9,15 @@ namespace LastMachine.Arandia
         public TurretController_Arandia turret;
 
         [Header("Sensor")]
-        public RectTransform sensorFill;
+        public Image sensorFill;
         public TextMeshProUGUI sensorText;
 
         [Header("Canon")]
-        public RectTransform canonFill;
+        public Image canonFill;
         public TextMeshProUGUI canonText;
 
         [Header("Motor")]
-        public RectTransform motorFill;
+        public Image motorFill;
         public TextMeshProUGUI motorText;
 
         void Update()
@@ -29,25 +29,35 @@ namespace LastMachine.Arandia
             UpdateBar(motorFill, motorText, turret.motor);
         }
 
-        void UpdateBar(RectTransform bar, TextMeshProUGUI txt, TurretComponent_Arandia comp)
+        void UpdateBar(Image bar, TextMeshProUGUI txt, TurretComponent_Arandia comp)
         {
             if (comp == null) return;
 
             float pct = comp.HPPercent;
 
-            // Cambiar tamaño
-            bar.sizeDelta = new Vector2(120 * pct, bar.sizeDelta.y);
+            // 🔹 Relleno
+            bar.fillAmount = pct;
 
-            // Texto
+            // 🔹 Texto
             txt.text = Mathf.RoundToInt(pct * 100) + "%";
 
-            // Color
+            // 🔹 Color progresivo (verde → amarillo → rojo)
+            Color color;
+
             if (pct > 0.5f)
-                bar.GetComponent<Image>().color = Color.green;
-            else if (pct > 0.2f)
-                bar.GetComponent<Image>().color = Color.yellow;
+            {
+                // Verde → Amarillo
+                float t = (pct - 0.5f) / 0.5f;
+                color = Color.Lerp(Color.yellow, Color.green, t);
+            }
             else
-                bar.GetComponent<Image>().color = Color.red;
+            {
+                // Amarillo → Rojo
+                float t = pct / 0.5f;
+                color = Color.Lerp(Color.red, Color.yellow, t);
+            }
+
+            bar.color = color;
         }
     }
 }

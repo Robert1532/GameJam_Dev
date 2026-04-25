@@ -12,7 +12,7 @@ public class Armored : MonoBehaviour
 
     public float rangoAtaque = 1f;
     public float vida = 150f;
-    public float da�o = 8f;
+    public float dano = 8f;
 
     void Start()
     {
@@ -70,7 +70,7 @@ public class Armored : MonoBehaviour
         }
     }
 
-    public void RecibirDa�o(float cantidad)
+    public void RecibirDaño(float cantidad)
     {
         vida -= cantidad;
         if (vida <= 0)
