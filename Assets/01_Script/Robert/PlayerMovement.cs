@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -18,8 +21,20 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        float h = Input.GetAxis("Horizontal"); // A, D
-        float v = Input.GetAxis("Vertical");   // W, S
+        float h = 0f;
+        float v = 0f;
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) h = -1f;
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) h = 1f;
+            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) v = -1f;
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) v = 1f;
+        }
+#else
+        h = Input.GetAxis("Horizontal");
+        v = Input.GetAxis("Vertical");
+#endif
 
         movement = new Vector3(h, 0f, v).normalized;
 

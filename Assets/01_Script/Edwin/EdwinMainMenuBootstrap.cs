@@ -206,7 +206,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float startClickVolume = 1f;
     [SerializeField, Range(0f, 1f)] float startHoverVolume = 1f;
 
-    [SerializeField] string nextSceneName = "Main";
+    [SerializeField] string nextSceneName = "Robert";
 
     AudioSource _musicSource;
     AudioSource _uiSfxSource;
