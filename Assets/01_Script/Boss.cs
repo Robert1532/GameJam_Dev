@@ -63,6 +63,9 @@ public class Boss : MonoBehaviour
 
         ConfigurarDificultad(OleadaNmro);
 
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
+
         StartCoroutine(RutinaDisparoMisiles());
     }
 
