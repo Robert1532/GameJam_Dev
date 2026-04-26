@@ -5,7 +5,7 @@ namespace LastMachine.Arandia
     public class Projectile_Arandia : MonoBehaviour
     {
         public float speed = 15f;
-        public float damage = 25f;
+        public float damage = 15f;
         public float lifeTime = 4f;
         public string enemyTag = "Enemy";
 

@@ -88,9 +88,6 @@ namespace LastMachine.Arandia
 
             foreach (var t in turrets)
             {
-                if (t == null) continue;
-                t.OnPlayerEnterRange += OnEnterTurret;
-                t.OnPlayerExitRange += OnExitTurret;
             }
 
             if (repairSystem != null)

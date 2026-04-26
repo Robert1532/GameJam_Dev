@@ -6,7 +6,7 @@ namespace LastMachine.Arandia
 {
     public class WaveManager_Arandia : MonoBehaviour
     {
-        [Header("Configuracion de Oleadas - Arandia")]
+        [Header("Configuracion de Oleadas")]
         public int totalWaves = 10;
         public float waveDuration = 45f;
         public float truceDuration = 30f;
@@ -16,24 +16,20 @@ namespace LastMachine.Arandia
         public TurretDegradation_Arandia[] turretDegradations;
         public GameManager_Arandia gameManager;
 
-        [Header("Spawner de Enemigos")]
+        [Header("Spawner")]
         public EnemySpawner_Arandia enemySpawner;
 
         [Header("UI")]
         public TextMeshProUGUI waveText;
-        public TextMeshProUGUI timerText;        // 🔥 TIEMPO TOTAL
-        public TextMeshProUGUI nextWaveText;     // 🔥 NUEVO
+        public TextMeshProUGUI timerText;
+        public TextMeshProUGUI nextWaveText;
         public TextMeshProUGUI statusText;
-        public GameObject waveAnnouncementPanel;
 
-        // Estado
-        [SerializeField] private int currentWave = 0;
-        [SerializeField] private bool waveActive = false;
-        [SerializeField] private float waveTimer = 0f;
+        private int currentWave = 0;
+        private bool waveActive = false;
+        private float waveTimer = 0f;
+        private float totalGameTime = 0f;
 
-        private float totalGameTime = 0f; // 🔥 NUEVO
-
-        // Eventos
         public System.Action<int> OnWaveStart;
         public System.Action<int> OnWaveEnd;
         public System.Action OnTruceStart;
@@ -44,34 +40,34 @@ namespace LastMachine.Arandia
 
         void Start()
         {
+            // 🔥 AUTO BUSCAR GAME MANAGER (SOLUCIÓN AL ERROR)
+            if (gameManager == null)
+                gameManager = FindFirstObjectByType<GameManager_Arandia>();
+
             StartCoroutine(GameLoop());
         }
 
         void Update()
         {
-            // 🔥 TIEMPO TOTAL SIEMPRE CORRIENDO
-            if (gameManager != null && gameManager.IsGameOver) return;
+            // 🔥 PROTECCIÓN TOTAL
+            if (gameManager != null && gameManager.IsGameOver)
+                return;
 
             totalGameTime += Time.deltaTime;
             UpdateTotalTimerUI();
         }
 
-        private IEnumerator GameLoop()
+        IEnumerator GameLoop()
         {
             currentWave = 0;
 
-            ShowStatus(
-                "La Fábrica necesita un mecánico.\n" +
-                "Muévete con WASD. Presiona E para reparar."
-            );
+            ShowStatus("Muévete con WASD. Presiona E para reparar.");
 
-            // 🔥 Cuenta regresiva inicial
             yield return StartCoroutine(CountdownNextWave(waveCountdownTime, 1));
 
             for (int wave = 1; wave <= totalWaves; wave++)
             {
-                if (gameManager != null && gameManager.IsGameOver)
-                    yield break;
+                if (IsGameOver()) yield break;
 
                 currentWave = wave;
 
@@ -81,8 +77,7 @@ namespace LastMachine.Arandia
 
                 while (waveTimer < waveDuration)
                 {
-                    if (gameManager != null && gameManager.IsGameOver)
-                        yield break;
+                    if (IsGameOver()) yield break;
 
                     waveTimer += Time.deltaTime;
 
@@ -97,7 +92,7 @@ namespace LastMachine.Arandia
                 {
                     OnGameWon?.Invoke();
 
-                    ShowStatus("LAST MACHINE OPERATIONAL\n¡Has sobrevivido!");
+                    ShowStatus("VICTORIA");
 
                     if (waveText != null)
                         waveText.text = "VICTORIA";
@@ -112,11 +107,13 @@ namespace LastMachine.Arandia
             }
         }
 
-        // ==================================================
-        // 🔥 CUENTA REGRESIVA A SIGUIENTE OLEADA
-        // ==================================================
+        // 🔥 MÉTODO CENTRAL (EVITA ERRORES)
+        bool IsGameOver()
+        {
+            return gameManager != null && gameManager.IsGameOver;
+        }
 
-        private IEnumerator CountdownNextWave(float duration, int nextWave)
+        IEnumerator CountdownNextWave(float duration, int nextWave)
         {
             float timer = duration;
 
@@ -129,15 +126,11 @@ namespace LastMachine.Arandia
             }
         }
 
-        // ==================================================
-        // FASES
-        // ==================================================
-
-        private void StartWave(int wave)
+        void StartWave(int wave)
         {
             waveActive = true;
 
-            ShowStatus($"OLEADA {wave} — ¡Defiende!");
+            ShowStatus($"OLEADA {wave}");
 
             if (waveText != null)
                 waveText.text = $"OLEADA {wave}";
@@ -150,11 +143,9 @@ namespace LastMachine.Arandia
                 StartCoroutine(enemySpawner.SpawnWave(wave));
 
             OnWaveStart?.Invoke(wave);
-
-            Debug.Log($"[Arandia] === OLEADA {wave} INICIADA ===");
         }
 
-        private void EndWave(int wave)
+        void EndWave(int wave)
         {
             waveActive = false;
 
@@ -163,11 +154,9 @@ namespace LastMachine.Arandia
                     deg.PauseDegrade();
 
             OnWaveEnd?.Invoke(wave);
-
-            Debug.Log($"[Arandia] === OLEADA {wave} COMPLETADA ===");
         }
 
-        private IEnumerator TrucePhase(int nextWave)
+        IEnumerator TrucePhase(int nextWave)
         {
             OnTruceStart?.Invoke();
 
@@ -175,29 +164,24 @@ namespace LastMachine.Arandia
 
             while (timer > 0f)
             {
-                if (gameManager != null && gameManager.IsGameOver)
-                    yield break;
+                if (IsGameOver()) yield break;
 
                 UpdateNextWaveText(timer, $"OLEADA {nextWave}");
 
-                ShowStatus($"TREGUA — Repara ({Mathf.CeilToInt(timer)}s)");
+                ShowStatus($"TREGUA ({Mathf.CeilToInt(timer)}s)");
 
                 timer -= Time.deltaTime;
                 yield return null;
             }
         }
 
-        // ==================================================
-        // UI HELPERS
-        // ==================================================
-
-        private void ShowStatus(string msg)
+        void ShowStatus(string msg)
         {
             if (statusText != null)
                 statusText.text = msg;
         }
 
-        private void UpdateTotalTimerUI()
+        void UpdateTotalTimerUI()
         {
             if (timerText == null) return;
 
@@ -207,7 +191,7 @@ namespace LastMachine.Arandia
             timerText.text = $"{min:00}:{sec:00}";
         }
 
-        private void UpdateNextWaveText(float time, string label)
+        void UpdateNextWaveText(float time, string label)
         {
             if (nextWaveText == null) return;
 

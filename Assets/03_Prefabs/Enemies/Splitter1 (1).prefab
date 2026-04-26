@@ -53,7 +53,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
   enemyType: 1
-  damage: 3
+  damage: 6
   attackInterval: 1.5
   attackRange: 2
   isAttacking: 0
@@ -80,7 +80,7 @@ MonoBehaviour:
   alturaSalto: 4
   duracionSalto: 0.4
   esperaEntreSaltos: 0.7
-  vida: 45
+  vida: 40
   "da\xF1o": 6
 --- !u!33 &806032735498384244
 MeshFilter:

@@ -1,8 +1,3 @@
-// TurretDegradation_Arandia.cs
-// Responsable: Arandia
-// Descripcion: Reduce HP de los componentes con el tiempo y recibe daño de enemigos.
-//              Se pausa entre oleadas (llamar PauseDegrade / ResumeDegrade desde GameManager).
-
 using UnityEngine;
 
 namespace LastMachine.Arandia
@@ -23,21 +18,22 @@ namespace LastMachine.Arandia
         // Referencias
         private TurretController_Arandia turret;
 
-        // Timer acumulado
+        // Timer
         private float degradeTimer = 0f;
-        private const float TICK_INTERVAL = 1f; // cada 1 segundo aplica daño
+        private const float TICK_INTERVAL = 1f;
 
         void Awake()
         {
             turret = GetComponent<TurretController_Arandia>();
+
             if (turret == null)
-                Debug.LogError("[Arandia] TurretDegradation necesita TurretController en el mismo GameObject.");
+                Debug.LogError("[Arandia] Falta TurretController en el objeto.");
         }
 
         void Update()
         {
             if (!isDegrading) return;
-            if (turret == null || turret.IsDestroyed) return;
+            if (turret == null) return; // 🔥 YA NO BLOQUEAMOS POR IsDestroyed
 
             degradeTimer += Time.deltaTime;
 
@@ -48,57 +44,54 @@ namespace LastMachine.Arandia
             }
         }
 
-        // ──────────────────────────────────────────────
-        //  API pública — llamar desde GameManager / WaveManager
-        // ──────────────────────────────────────────────
+        // =========================
+        // API PUBLICA
+        // =========================
 
-        /// <summary>Activa la degradación al comenzar una oleada.</summary>
         public void StartDegrading(int waveNumber)
         {
             currentWave = waveNumber;
             isDegrading = true;
             degradeTimer = 0f;
-            Debug.Log($"[Arandia] {turret.turretName}: degradación activa (oleada {waveNumber})");
+
+            Debug.Log($"[Degradacion] {turret.turretName} activa (Wave {waveNumber})");
         }
 
-        /// <summary>Pausa la degradación en tregua entre oleadas.</summary>
         public void PauseDegrade()
         {
             isDegrading = false;
         }
 
-        /// <summary>Reanuda la degradación cuando comienza la siguiente oleada.</summary>
         public void ResumeDegrade(int waveNumber)
         {
             StartDegrading(waveNumber);
         }
 
-        /// <summary>
-        /// Aplica daño directo de un enemigo a un componente específico.
-        /// Llamar desde el script de enemigo cuando ataca la torreta.
-        /// </summary>
-        /// <param name="type">Componente objetivo (Sensor, Canon, Motor)</param>
-        /// <param name="damage">Cantidad de daño</param>
         public void ReceiveEnemyDamage(ComponentType type, float damage)
         {
-            if (turret == null || turret.IsDestroyed) return;
+            if (turret == null) return;
 
-            TurretComponent_Arandia target = GetComponent(type);
+            TurretComponent_Arandia target = GetTurretComponent(type);
             if (target == null) return;
 
+            // 🔥 NO BLOQUEAR POR TORRETA DESTRUIDA
             target.TakeDamage(damage);
-            Debug.Log($"[Arandia] {turret.turretName}: {type} recibió {damage} daño de enemigo. HP: {target.HPPercent * 100f:F0}%");
+
+            Debug.Log($"[EnemyDamage] {turret.turretName} -> {type} (-{damage})");
         }
 
-        // ──────────────────────────────────────────────
-        //  Internos
-        // ──────────────────────────────────────────────
+        // =========================
+        // INTERNOS
+        // =========================
 
         private void ApplyTimeDegradation()
         {
+            if (turret.sensor == null || turret.canon == null || turret.motor == null)
+                return;
+
             float dmg = GetCurrentDps();
 
-            // Daño distribuido: el cañón se desgasta más rápido (es la pieza más usada)
+            // Distribución de desgaste
             turret.sensor.TakeDamage(dmg * 0.8f);
             turret.canon.TakeDamage(dmg * 1.2f);
             turret.motor.TakeDamage(dmg * 0.9f);
@@ -109,21 +102,25 @@ namespace LastMachine.Arandia
             return baseDamagePerSecond + (waveScaling * (currentWave - 1));
         }
 
-        private TurretComponent_Arandia GetComponent(ComponentType type)
+        private TurretComponent_Arandia GetTurretComponent(ComponentType type)
         {
             switch (type)
             {
                 case ComponentType.Sensor: return turret.sensor;
-                case ComponentType.Canon:  return turret.canon;
-                case ComponentType.Motor:  return turret.motor;
+                case ComponentType.Canon: return turret.canon;
+                case ComponentType.Motor: return turret.motor;
                 default: return null;
             }
         }
 
-        // Gizmos para debug
-        private void OnDrawGizmosSelected()
+        // =========================
+        // DEBUG
+        // =========================
+
+        void OnDrawGizmosSelected()
         {
             if (!isDegrading) return;
+
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(transform.position + Vector3.up * 1.5f, Vector3.one * 0.3f);
         }
