@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 7826384346629317215}
   m_Layer: 0
   m_Name: Boss
-  m_TagString: Boss
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -87,7 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.EnemyTurretAttack
   enemyType: 3
-  damage: 20
+  damage: 35
   attackInterval: 1.5
   attackRange: 12
   isAttacking: 0
@@ -126,9 +126,9 @@ MonoBehaviour:
   radioDePaseo: 20
   tiempoEsperaPaseo: 2
   animator: {fileID: 8201518082058703315}
-  vida: 200
-  danoOndas: 18
-  danoEarth: 25
+  vida: 500
+  danoOndas: 20
+  danoEarth: 30
 --- !u!33 &1136772935201509278
 MeshFilter:
   m_ObjectHideFlags: 0

@@ -8,39 +8,28 @@ namespace LastMachine.Arandia
 {
     public class GameManager_Arandia : MonoBehaviour
     {
-        [Header("Torretas - Arandia")]
+        [Header("Torretas")]
         public List<TurretController_Arandia> turrets = new List<TurretController_Arandia>();
 
-        [Header("Referencia al WaveManager")]
+        [Header("Wave Manager")]
         public WaveManager_Arandia waveManager;
 
-        [Header("UI - Game Over")]
+        [Header("UI Game Over")]
         public GameObject gameOverPanel;
         public TextMeshProUGUI gameOverTitle;
         public TextMeshProUGUI gameOverScore;
         public Button retryButton;
 
-        [Header("UI - Victoria")]
+        [Header("UI Victoria")]
         public GameObject victoryPanel;
         public TextMeshProUGUI victoryTitle;
         public TextMeshProUGUI victoryScore;
-
-        // Estado
-        [SerializeField] private bool isGameOver = false;
-        [SerializeField] private int turretsDestroyed = 0;
-        private float survivalTime = 0f;
-
         public bool IsGameOver => isGameOver;
-        public float SurvivalTime => survivalTime;
+        private bool isGameOver = false;
+        private float survivalTime = 0f;
 
         void Start()
         {
-            foreach (var turret in turrets)
-            {
-                if (turret != null)
-                    turret.OnTurretDestroyed += OnTurretDestroyed;
-            }
-
             if (waveManager != null)
                 waveManager.OnGameWon += ShowVictory;
 
@@ -57,77 +46,46 @@ namespace LastMachine.Arandia
 
             survivalTime += Time.deltaTime;
 
-            // 🔥 NUEVO: chequeo global de componentes en 0
             CheckAllTurretsDead();
         }
 
-        // ──────────────────────────────────────────────
-        // TORRETAS DESTRUIDAS (sistema original)
-        // ──────────────────────────────────────────────
-
-        private void OnTurretDestroyed(TurretController_Arandia turret)
-        {
-            if (isGameOver) return;
-
-            turretsDestroyed++;
-
-            Debug.Log($"[Arandia] TORRETA DESTRUIDA: {turret.turretName}. Total: {turretsDestroyed}/4");
-
-            if (turretsDestroyed >= 4)
-            {
-                GameOver();
-            }
-        }
-
-        // ──────────────────────────────────────────────
-        // 🔥 NUEVO: TODOS LOS COMPONENTES EN 0
-        // ──────────────────────────────────────────────
-
+        // 🔥 NUEVA LÓGICA CORRECTA
         void CheckAllTurretsDead()
         {
             if (turrets == null || turrets.Count == 0) return;
 
-            int turretsEvaluated = 0;
+            int validTurrets = 0;
 
             foreach (var t in turrets)
             {
                 if (t == null) continue;
+                if (t.sensor == null || t.canon == null || t.motor == null) continue;
 
-                // Referencia sin asignar no cuenta como "pieza rota" (evita game over instantáneo).
-                if (t.sensor == null || t.canon == null || t.motor == null)
-                    continue;
+                validTurrets++;
 
-                turretsEvaluated++;
-
-                if (!IsComponentDead(t.sensor)) return;
-                if (!IsComponentDead(t.canon)) return;
-                if (!IsComponentDead(t.motor)) return;
+                if (!IsDead(t.sensor)) return;
+                if (!IsDead(t.canon)) return;
+                if (!IsDead(t.motor)) return;
             }
 
-            if (turretsEvaluated == 0)
-                return;
+            if (validTurrets == 0) return;
 
-            Debug.Log("[Arandia] Todos los componentes de todas las torretas están en 0");
+            Debug.Log("GAME OVER: todas las torretas destruidas");
             GameOver();
         }
 
-        static bool IsComponentDead(TurretComponent_Arandia comp)
+        bool IsDead(TurretComponent_Arandia comp)
         {
             return comp != null && comp.CurrentHP <= 0f;
         }
 
-        // ──────────────────────────────────────────────
-        // GAME OVER
-        // ──────────────────────────────────────────────
-
-        private void GameOver()
+        // ───────────── GAME OVER ─────────────
+        void GameOver()
         {
-            if (isGameOver) return; // 🔥 evita duplicado
+            if (isGameOver) return;
 
             isGameOver = true;
             Time.timeScale = 0f;
-
-            Debug.Log("[Arandia] ═══ GAME OVER — La Fábrica ha caído ═══");
 
             if (gameOverPanel != null)
             {
@@ -144,22 +102,17 @@ namespace LastMachine.Arandia
                     int sec = Mathf.FloorToInt(survivalTime % 60f);
 
                     gameOverScore.text =
-                        $"Oleada alcanzada: {wave}\nTiempo: {min:00}:{sec:00}";
+                        $"Oleada: {wave}\nTiempo: {min:00}:{sec:00}";
                 }
             }
         }
 
-        // ──────────────────────────────────────────────
-        // VICTORIA
-        // ──────────────────────────────────────────────
-
-        private void ShowVictory()
+        // ───────────── VICTORIA ─────────────
+        void ShowVictory()
         {
             if (isGameOver) return;
 
             Time.timeScale = 0f;
-
-            Debug.Log("[Arandia] ═══ VICTORIA — LAST MACHINE OPERATIONAL ═══");
 
             if (victoryPanel != null)
             {
@@ -174,23 +127,18 @@ namespace LastMachine.Arandia
                     int sec = Mathf.FloorToInt(survivalTime % 60f);
 
                     victoryScore.text =
-                        $"10 oleadas sobrevividas\nTiempo total: {min:00}:{sec:00}";
+                        $"10 oleadas sobrevividas\nTiempo: {min:00}:{sec:00}";
                 }
             }
         }
 
-        // ──────────────────────────────────────────────
-        // RETRY
-        // ──────────────────────────────────────────────
-
+        // ───────────── RETRY ─────────────
         public void RetryGame()
         {
             Time.timeScale = 1f;
+
             var scene = SceneManager.GetActiveScene();
-            if (scene.IsValid() && !string.IsNullOrEmpty(scene.name))
-                SceneManager.LoadScene(scene.name);
-            else
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(scene.name);
         }
     }
 }
