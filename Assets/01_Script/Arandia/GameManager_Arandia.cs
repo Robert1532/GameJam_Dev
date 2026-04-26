@@ -87,25 +87,33 @@ namespace LastMachine.Arandia
         {
             if (turrets == null || turrets.Count == 0) return;
 
+            int turretsEvaluated = 0;
+
             foreach (var t in turrets)
             {
                 if (t == null) continue;
 
-                // Si algún componente AÚN tiene vida → NO game over
+                // Referencia sin asignar no cuenta como "pieza rota" (evita game over instantáneo).
+                if (t.sensor == null || t.canon == null || t.motor == null)
+                    continue;
+
+                turretsEvaluated++;
+
                 if (!IsComponentDead(t.sensor)) return;
                 if (!IsComponentDead(t.canon)) return;
                 if (!IsComponentDead(t.motor)) return;
             }
 
-            // Si llega aquí → TODO está destruido
+            if (turretsEvaluated == 0)
+                return;
+
             Debug.Log("[Arandia] Todos los componentes de todas las torretas están en 0");
             GameOver();
         }
 
-        bool IsComponentDead(TurretComponent_Arandia comp)
+        static bool IsComponentDead(TurretComponent_Arandia comp)
         {
-            if (comp == null) return true;
-            return comp.CurrentHP <= 0f;
+            return comp != null && comp.CurrentHP <= 0f;
         }
 
         // ──────────────────────────────────────────────
@@ -178,7 +186,11 @@ namespace LastMachine.Arandia
         public void RetryGame()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            var scene = SceneManager.GetActiveScene();
+            if (scene.IsValid() && !string.IsNullOrEmpty(scene.name))
+                SceneManager.LoadScene(scene.name);
+            else
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

@@ -35,10 +35,34 @@ namespace LastMachine
                 return;
             }
 
+            // Torreta destruida (los 3 componentes rotos): dejar de atacar y buscar otra o quedar idle
+            TurretController_Arandia ctrl = currentTurret.GetComponent<TurretController_Arandia>();
+            if (ctrl == null || ctrl.IsDestroyed)
+            {
+                StopAttacking();
+                currentTurret = null;
+                targetComponent = null;
+                FindNearestTurret();
+                return;
+            }
+
             // Medir distancia contra el COMPONENTE objetivo, no el centro
             if (targetComponent == null)
             {
                 ResolveTargetComponent();
+            }
+
+            // Objetivo roto sin piezas vivas en esta torreta (ResolveTargetComponent pudo quedar obsoleto)
+            if (targetComponent != null && targetComponent.IsBroken)
+            {
+                if (!TryPickLivingTarget(ctrl))
+                {
+                    StopAttacking();
+                    currentTurret = null;
+                    targetComponent = null;
+                    FindNearestTurret();
+                    return;
+                }
             }
 
             Vector3 targetPos = targetComponent != null
@@ -61,10 +85,14 @@ namespace LastMachine
         {
             TurretDegradation_Arandia[] all = FindObjectsByType<TurretDegradation_Arandia>(FindObjectsSortMode.None);
             float closest = Mathf.Infinity;
+            currentTurret = null;
 
             foreach (var t in all)
             {
                 if (t == null) continue;
+                var c = t.GetComponent<TurretController_Arandia>();
+                if (c == null || c.IsDestroyed) continue;
+
                 float d = Vector3.Distance(transform.position, t.transform.position);
                 if (d < closest)
                 {
@@ -83,7 +111,7 @@ namespace LastMachine
 
             // Obtener TurretController del mismo GameObject
             TurretController_Arandia controller = currentTurret.GetComponent<TurretController_Arandia>();
-            if (controller == null) return;
+            if (controller == null || controller.IsDestroyed) return;
 
             switch (enemyType)
             {
@@ -98,6 +126,20 @@ namespace LastMachine
                     else targetComponent = controller.motor;
                     break;
             }
+
+            if (targetComponent != null && targetComponent.IsBroken)
+                TryPickLivingTarget(controller);
+        }
+
+        /// <summary>Elige el primer componente de esta torreta que aún no esté roto.</summary>
+        bool TryPickLivingTarget(TurretController_Arandia controller)
+        {
+            if (controller == null) return false;
+            if (controller.sensor != null && !controller.sensor.IsBroken) { targetComponent = controller.sensor; return true; }
+            if (controller.canon != null && !controller.canon.IsBroken) { targetComponent = controller.canon; return true; }
+            if (controller.motor != null && !controller.motor.IsBroken) { targetComponent = controller.motor; return true; }
+            targetComponent = null;
+            return false;
         }
 
         void StartAttacking()
@@ -128,22 +170,20 @@ namespace LastMachine
                     yield break;
                 }
 
-                // Si el componente objetivo ya está roto, buscar otro
-                if (targetComponent.IsBroken)
+                TurretController_Arandia controller = currentTurret.GetComponent<TurretController_Arandia>();
+                if (controller == null || controller.IsDestroyed)
                 {
-                    // Intentar cambiar al siguiente componente disponible
-                    TurretController_Arandia controller = currentTurret.GetComponent<TurretController_Arandia>();
-                    if (controller != null)
+                    StopAttacking();
+                    yield break;
+                }
+
+                // Si el componente objetivo ya está roto, buscar otro
+                if (targetComponent.IsBroken || targetComponent.CurrentHP <= 0f)
+                {
+                    if (!TryPickLivingTarget(controller))
                     {
-                        if (!controller.sensor.IsBroken) targetComponent = controller.sensor;
-                        else if (!controller.canon.IsBroken) targetComponent = controller.canon;
-                        else if (!controller.motor.IsBroken) targetComponent = controller.motor;
-                        else
-                        {
-                            // Torreta destruida, dejar de atacar
-                            StopAttacking();
-                            yield break;
-                        }
+                        StopAttacking();
+                        yield break;
                     }
                 }
 
@@ -156,11 +196,13 @@ namespace LastMachine
                     yield break;
                 }
 
-                // APLICAR DAÑO
+                // APLICAR DAÑO (ReceiveEnemyDamage no hace nada si torreta destruida o pieza rota)
                 ComponentType tipo = GetComponentType();
-                currentTurret.ReceiveEnemyDamage(tipo, damage);
-
-                Debug.Log($"[EnemyAttack] {gameObject.name} golpeó {tipo} — daño: {damage}");
+                if (!targetComponent.IsBroken && targetComponent.CurrentHP > 0f)
+                {
+                    currentTurret.ReceiveEnemyDamage(tipo, damage);
+                    Debug.Log($"[EnemyAttack] {gameObject.name} golpeó {tipo} — daño: {damage}");
+                }
 
                 yield return new WaitForSeconds(attackInterval);
             }

@@ -65,15 +65,6 @@ public class Scrapper : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
         if (PiezaMotorPrefab != null)

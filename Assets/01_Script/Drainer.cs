@@ -70,15 +70,6 @@ public class Drainer : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
         if (PiezaCañonPrefab != null)

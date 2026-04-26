@@ -112,15 +112,6 @@ public class Rusher : MonoBehaviour
         }
     }
 
-    public void TomarDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
         if (efecto != null) efecto.Stop();

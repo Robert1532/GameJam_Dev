@@ -70,15 +70,6 @@ public class Armored : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
         if (PiezaSensorPrefab != null)

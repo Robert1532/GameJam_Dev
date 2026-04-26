@@ -38,6 +38,14 @@ namespace LastMachine.Arandia
         public bool IsBroken => state == ComponentState.Broken;
         public bool IsDamaged => state == ComponentState.Damaged;
 
+        void Awake()
+        {
+            // La escena/prefab suele guardar currentHP en 0; inicializar antes que otros Awake/Update
+            // evita un frame donde el GameManager cree que la fábrica ya está destruida.
+            if (maxHP > 0f && currentHP <= 0f)
+                currentHP = maxHP;
+        }
+
         void Start()
         {
             currentHP = maxHP;

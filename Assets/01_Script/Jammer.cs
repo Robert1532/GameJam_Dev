@@ -72,15 +72,6 @@ public class Jammer : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        if (estaMuerto) return;
-
-        vida -= cantidad;
-
-        if (vida <= 0) Morir();
-    }
-
     void Morir()
     {
         if (estaMuerto) return;

@@ -107,6 +107,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Boss
   tagObjetivo: Sensor
   tagTorreta: Torreta
+  efectoExplosion: {fileID: 3937646882799579496, guid: 65b3df8a83143114e8f2d03c04ac4514, type: 3}
+  efectoDestello: {fileID: 4487766158467488113, guid: 95f0af5ad9b0ae44ead206ef88dd86e7, type: 3}
   tunderPrefab: {fileID: 949305011412579521, guid: 9b1c17fb8f1cd3e468fa2fd5d9750e18, type: 3}
   rangoOndas: 12
   vidaActivacionSegundaOnda: 120
@@ -125,8 +127,8 @@ MonoBehaviour:
   tiempoEsperaPaseo: 2
   animator: {fileID: 8201518082058703315}
   vida: 200
-  "da\xF1oOndas": 18
-  "da\xF1oEarth": 25
+  danoOndas: 18
+  danoEarth: 25
 --- !u!33 &1136772935201509278
 MeshFilter:
   m_ObjectHideFlags: 0

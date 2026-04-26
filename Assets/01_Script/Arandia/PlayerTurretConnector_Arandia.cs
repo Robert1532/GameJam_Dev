@@ -18,19 +18,62 @@ namespace LastMachine.Arandia
 
         private TurretController_Arandia currentTurret;
 
-        void Start()
+        void Awake()
         {
             if (repairSystem == null)
+            {
                 repairSystem = GetComponent<RepairSystem_Arandia>();
+                if (repairSystem == null)
+                    repairSystem = GetComponentInParent<RepairSystem_Arandia>();
+            }
 
             if (inventory == null)
+            {
                 inventory = GetComponent<PieceInventory_Arandia>();
+                if (inventory == null)
+                    inventory = GetComponentInParent<PieceInventory_Arandia>();
+            }
+
+            if (turretUI == null)
+            {
+                turretUI = GetComponent<TurretPanelUI_Arandia>();
+                if (turretUI == null)
+                    turretUI = GetComponentInChildren<TurretPanelUI_Arandia>(true);
+                if (turretUI == null)
+                    turretUI = GetComponentInParent<TurretPanelUI_Arandia>();
+                if (turretUI == null)
+                    turretUI = FindFirstObjectByType<TurretPanelUI_Arandia>(FindObjectsInactive.Include);
+            }
+        }
+
+        void Start()
+        {
+            if (turretUI == null)
+            {
+                Debug.LogError(
+                    "[PlayerTurretConnector_Arandia] Falta TurretPanelUI_Arandia: asígnalo en el Inspector o colócalo en el mismo jugador / hijos.",
+                    this);
+                enabled = false;
+                return;
+            }
+
+            if (repairSystem == null)
+            {
+                Debug.LogError(
+                    "[PlayerTurretConnector_Arandia] Falta RepairSystem_Arandia en el jugador.",
+                    this);
+                enabled = false;
+                return;
+            }
 
             turretUI.Init(repairSystem, inventory);
         }
 
         void Update()
         {
+            if (turretUI == null || repairSystem == null)
+                return;
+
             DetectNearestTurret();
             HandleInput();
         }

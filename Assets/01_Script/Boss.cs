@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +11,7 @@ public class Boss : MonoBehaviour
     public ParticleSystem efectoExplosion;
     public ParticleSystem efectoDestello;
 
-    [Header("Configuración de Ondas")]
+    [Header("Configuracion de ondas")]
     public GameObject tunderPrefab;
     public float rangoOndas = 12f;
     public float vidaActivacionSegundaOnda = 120f;
@@ -42,16 +41,16 @@ public class Boss : MonoBehaviour
     [Header("Estado")]
     public Animator animator;
     public float vida = 200f;
-    public float dañoOndas = 18f;
-    public float dañoEarth = 25f;
+    public float danoOndas = 18f;
+    public float danoEarth = 25f;
 
     public void ConfigurarDificultad(int numOleada)
     {
         oleadaActualParaMisiles = numOleada;
         float multiplicador = 1f + ((numOleada - 3) * 0.1f);
         vida *= multiplicador;
-        dañoOndas *= multiplicador;
-        dañoEarth *= multiplicador;
+        danoOndas *= multiplicador;
+        danoEarth *= multiplicador;
         cantidadMisiles = 2 + (numOleada / 3);
 
         if (agente != null) agente.speed = Mathf.Min(3.5f * multiplicador, 6f);
@@ -117,19 +116,12 @@ public class Boss : MonoBehaviour
         return null;
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
-        Instantiate(efectoDestello, transform.position, transform.rotation);
-        Instantiate(efectoExplosion, transform.position, transform.rotation);
+        if (efectoDestello != null)
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+        if (efectoExplosion != null)
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
 
         Destroy(gameObject);
     }
@@ -236,7 +228,7 @@ public class Boss : MonoBehaviour
             esc.y = dir.magnitude / 2f;
             rayo.transform.localScale = esc;
 
-            // Aqui dañoOndas al objetivo
+            // Aqui danoOndas al objetivo
         }
         else
         {
