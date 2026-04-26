@@ -1,11 +1,4 @@
-// PlayerTurretConnector_Arandia.cs
-// Responsable: Arandia
-// Descripcion: Componente del jugador que detecta la torreta mas cercana en rango,
-//              activa el HUD correcto y conecta el RepairSystem con ella.
-//              Coloca este script en el GameObject del Jugador.
-
 using UnityEngine;
-using System.Collections.Generic;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -14,54 +7,96 @@ namespace LastMachine.Arandia
 {
     public class PlayerTurretConnector_Arandia : MonoBehaviour
     {
-        [Header("Referencias del Jugador - Arandia")]
         public RepairSystem_Arandia repairSystem;
         public PieceInventory_Arandia inventory;
+        public TurretPanelUI_Arandia turretUI;
 
-        [Header("Configuracion")]
-        [Tooltip("Radio para detectar torretas. Debe ser igual al SphereCollider de la torreta.")]
         public float interactRadius = 3.5f;
         public LayerMask turretLayer;
 
-        [Header("Feedback Visual")]
-        [Tooltip("Texto que aparece en pantalla con el nombre de la torreta y el prompt E")]
-        public UnityEngine.UI.Text promptText;   // Opcional: si usas UGUI simple
+        public UnityEngine.UI.Text promptText;
 
-        // Estado
         private TurretController_Arandia currentTurret;
+
+        void Awake()
+        {
+            if (repairSystem == null)
+            {
+                repairSystem = GetComponent<RepairSystem_Arandia>();
+                if (repairSystem == null)
+                    repairSystem = GetComponentInParent<RepairSystem_Arandia>();
+            }
+
+            if (inventory == null)
+            {
+                inventory = GetComponent<PieceInventory_Arandia>();
+                if (inventory == null)
+                    inventory = GetComponentInParent<PieceInventory_Arandia>();
+            }
+
+            if (turretUI == null)
+            {
+                turretUI = GetComponent<TurretPanelUI_Arandia>();
+                if (turretUI == null)
+                    turretUI = GetComponentInChildren<TurretPanelUI_Arandia>(true);
+                if (turretUI == null)
+                    turretUI = GetComponentInParent<TurretPanelUI_Arandia>();
+                if (turretUI == null)
+                    turretUI = FindFirstObjectByType<TurretPanelUI_Arandia>(FindObjectsInactive.Include);
+            }
+        }
 
         void Start()
         {
+            if (turretUI == null)
+            {
+                Debug.LogError(
+                    "[PlayerTurretConnector_Arandia] Falta TurretPanelUI_Arandia: asígnalo en el Inspector o colócalo en el mismo jugador / hijos.",
+                    this);
+                enabled = false;
+                return;
+            }
 
-            // Validar referencias
             if (repairSystem == null)
-                repairSystem = GetComponent<RepairSystem_Arandia>();
+            {
+                Debug.LogError(
+                    "[PlayerTurretConnector_Arandia] Falta RepairSystem_Arandia en el jugador.",
+                    this);
+                enabled = false;
+                return;
+            }
 
-            if (inventory == null)
-                inventory = GetComponent<PieceInventory_Arandia>();
+            turretUI.Init(repairSystem, inventory);
         }
 
         void Update()
         {
-            DetectNearestTurret();
+            if (turretUI == null || repairSystem == null)
+                return;
 
-            // Recoger piezas con F (opcional, drop de enemigos lo hace automático)
-            // Esta es la versión de emergencia para debug
-#if UNITY_EDITOR
-            bool fDown = false;
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null) fDown = Keyboard.current.fKey.wasPressedThisFrame;
-#else
-            fDown = Input.GetKeyDown(KeyCode.F);
-#endif
-            if (fDown)
-                inventory?.AddPieces(3);
-#endif
+            DetectNearestTurret();
+            HandleInput();
         }
 
-        // ──────────────────────────────────────────────
-        //  Detección de torreta más cercana
-        // ──────────────────────────────────────────────
+        void HandleInput()
+        {
+            bool ePressed = false;
+
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null)
+                ePressed = Keyboard.current.eKey.wasPressedThisFrame;
+#else
+            ePressed = Input.GetKeyDown(KeyCode.E);
+#endif
+
+            if (ePressed && currentTurret != null)
+            {
+                if (turretUI.IsOpen)
+                    turretUI.Hide();
+                else
+                    turretUI.Show(currentTurret);
+            }
+        }
 
         private void DetectNearestTurret()
         {
@@ -72,9 +107,8 @@ namespace LastMachine.Arandia
 
             foreach (Collider col in hits)
             {
-                TurretController_Arandia tc = col.GetComponent<TurretController_Arandia>();
-                if (tc == null)
-                    tc = col.GetComponentInParent<TurretController_Arandia>();
+                var tc = col.GetComponent<TurretController_Arandia>() ??
+                         col.GetComponentInParent<TurretController_Arandia>();
 
                 if (tc == null || tc.IsDestroyed) continue;
 
@@ -86,67 +120,36 @@ namespace LastMachine.Arandia
                 }
             }
 
-            // Cambio de torreta
+            // 🔥 Si cambias de torreta o te alejas → cerrar panel
             if (nearest != currentTurret)
             {
-                if (currentTurret != null)
-                    ExitTurret(currentTurret);
+                if (turretUI.IsOpen)
+                    turretUI.Hide();
+
+                repairSystem.ClearCurrentTurret();
 
                 if (nearest != null)
-                    EnterTurret(nearest);
+                    repairSystem.SetCurrentTurret(nearest);
 
                 currentTurret = nearest;
             }
 
-            // Actualizar prompt
             UpdatePrompt();
-        }
-
-        private void EnterTurret(TurretController_Arandia turret)
-        {
-            repairSystem?.SetCurrentTurret(turret);
-            Debug.Log($"[Arandia] Jugador entró en rango de {turret.turretName}");
-        }
-
-        private void ExitTurret(TurretController_Arandia turret)
-        {
-            repairSystem?.ClearCurrentTurret();
-            Debug.Log($"[Arandia] Jugador salió del rango de {turret.turretName}");
         }
 
         private void UpdatePrompt()
         {
             if (promptText == null) return;
 
-            if (currentTurret != null && !currentTurret.IsDestroyed)
+            if (currentTurret != null)
             {
-                promptText.text = $"{currentTurret.turretName} | E+1 Sensor  E+2 Cañón  E+3 Motor";
+                promptText.text = currentTurret.turretName + " | Presiona E";
                 promptText.gameObject.SetActive(true);
             }
             else
             {
                 promptText.gameObject.SetActive(false);
             }
-        }
-
-        // ──────────────────────────────────────────────
-        //  Getter público
-        // ──────────────────────────────────────────────
-
-        /// <summary>Retorna la torreta actualmente en rango del jugador.</summary>
-        public TurretController_Arandia CurrentTurret => currentTurret;
-
-        /// <summary>True si el jugador está en rango de alguna torreta.</summary>
-        public bool IsNearTurret => currentTurret != null;
-
-        // ──────────────────────────────────────────────
-        //  Gizmos debug
-        // ──────────────────────────────────────────────
-
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, interactRadius);
         }
     }
 }

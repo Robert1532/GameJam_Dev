@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 using System.Collections;
-using System.Collections.Generic;
 
 namespace LastMachine.Arandia
 {
@@ -41,7 +40,6 @@ namespace LastMachine.Arandia
 
         // Referencias internas
         private Transform currentTarget;
-        private List<Transform> enemiesInRange = new List<Transform>();
 
         // Eventos
         public System.Action<TurretController_Arandia> OnTurretDestroyed;
@@ -83,15 +81,6 @@ namespace LastMachine.Arandia
         void Update()
         {
             if (!isActive) return;
-
-            CleanEnemyList();
-
-            // INTERACCIÓN CON JUGADOR
-            if (playerInRange && IsInteractPressed())
-            {
-                Debug.Log($"[Interaccion] Abriendo HUD de {turretName}");
-                HUDBuilder_Arandia.Instance?.ShowTurretPanel(this);
-            }
 
             // LÓGICA DEL SENSOR (APUNTADO)
             if (!sensor.IsBroken)
@@ -231,23 +220,6 @@ namespace LastMachine.Arandia
         private bool AllComponentsBroken()
         {
             return sensor.IsBroken && canon.IsBroken && motor.IsBroken;
-        }
-
-        // Registro de enemigos en rango (llamado por los enemigos al entrar/salir)
-        public void RegisterEnemy(Transform enemy)
-        {
-            if (!enemiesInRange.Contains(enemy))
-                enemiesInRange.Add(enemy);
-        }
-
-        public void UnregisterEnemy(Transform enemy)
-        {
-            enemiesInRange.Remove(enemy);
-        }
-
-        private void CleanEnemyList()
-        {
-            enemiesInRange.RemoveAll(e => e == null);
         }
 
         // Deteccion de jugador para HUD
