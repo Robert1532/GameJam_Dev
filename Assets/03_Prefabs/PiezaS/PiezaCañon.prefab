@@ -4850,6 +4850,7 @@ GameObject:
   - component: {fileID: 6973650864227237324}
   - component: {fileID: 5639639768194433027}
   - component: {fileID: 7489764423511897199}
+  - component: {fileID: -3724514103533305800}
   m_Layer: 0
   m_Name: "PiezaCa\xF1on"
   m_TagString: "PiezaCa\xF1on"
@@ -4961,7 +4962,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -4989,11 +4990,27 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 122
   m_CollisionDetection: 0
+--- !u!114 &-3724514103533305800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5533098276997538225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd363ca4033d9b440b226982b329ee7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.PiecePickup_Arandia
+  piecesAmount: 3
+  rotationSpeed: 100
+  floatSpeed: 2
+  floatAmount: 0.2
 --- !u!1001 &8801996878783362389
 PrefabInstance:
   m_ObjectHideFlags: 0

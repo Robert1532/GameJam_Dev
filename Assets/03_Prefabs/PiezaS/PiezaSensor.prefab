@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2503471599700843930}
   - component: {fileID: 6206779439827854397}
   - component: {fileID: 7751756695723248929}
+  - component: {fileID: -7060148188846148647}
   m_Layer: 0
   m_Name: PiezaSensor
   m_TagString: PiezaSensor
@@ -125,7 +126,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -153,11 +154,27 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 122
   m_CollisionDetection: 0
+--- !u!114 &-7060148188846148647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2721435885093003892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd363ca4033d9b440b226982b329ee7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.PiecePickup_Arandia
+  piecesAmount: 3
+  rotationSpeed: 100
+  floatSpeed: 2
+  floatAmount: 0.2
 --- !u!1 &8100073013048981980
 GameObject:
   m_ObjectHideFlags: 0

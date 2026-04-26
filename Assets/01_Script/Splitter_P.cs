@@ -7,6 +7,8 @@ public class Splitter_P : MonoBehaviour
     private NavMeshAgent agente;
     public string tagObjetivo = "Sensor";
     public Animator animator;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float alturaSalto = 4f;
     public float duracionSalto = 0.5f;
@@ -25,6 +27,9 @@ public class Splitter_P : MonoBehaviour
     {
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 7f;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -125,6 +130,9 @@ public class Splitter_P : MonoBehaviour
 
         Vector3 dirHijo1 = (atras + izquierda).normalized;
         Vector3 dirHijo2 = (atras + derecha).normalized;
+
+        Instantiate(efectoDestello, transform.position, transform.rotation);
+        Instantiate(efectoExplosion, transform.position, transform.rotation);
 
         SpawnearHijo(prefabHijoUno, dirHijo1);
         SpawnearHijo(prefabHijoDos, dirHijo2);

@@ -7,19 +7,21 @@ public class Armored : MonoBehaviour
     public string tagObjetivo = "Torreta";
     public Animator animator;
     public GameObject PiezaSensorPrefab;
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
 
     public float rangoAtaque = 1f;
     public float vida = 150f;
-    public float daño = 8f;
+    public float dano = 8f;
 
     void Start()
     {
         agente = GetComponent<NavMeshAgent>();
-        if (agente != null)
-        {
-            agente.speed = 2.5f;
-            agente.stoppingDistance = rangoAtaque;
-        }
+        agente.speed = 2.5f;
+        agente.stoppingDistance = rangoAtaque;
+
+        efectoExplosion.Stop();
+        efectoDestello.Stop();
     }
 
     void Update()
@@ -34,7 +36,7 @@ public class Armored : MonoBehaviour
 
         if (objetivoCercano != null)
         {
-            // Evita el error: SetDestination solo funciona si el agente está activo y sobre NavMesh.
+            // Evita el error: SetDestination solo funciona si el agente estï¿½ activo y sobre NavMesh.
             if (agente != null && agente.enabled && agente.isOnNavMesh && gameObject.activeInHierarchy)
                 agente.SetDestination(objetivoCercano.transform.position);
 
@@ -68,19 +70,12 @@ public class Armored : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        vida -= cantidad;
-        if (vida <= 0)
-        {
-            Morir();
-        }
-    }
-
     void Morir()
     {
         if (PiezaSensorPrefab != null)
         {
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
             Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
         }
 

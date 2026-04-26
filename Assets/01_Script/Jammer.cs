@@ -4,14 +4,23 @@ using UnityEngine.AI;
 public class Jammer : MonoBehaviour
 {
     private NavMeshAgent agente;
+
     public string tagObjetivo = "Sensor";
+
     public GameObject tunderPrefab;
     public Transform tunderPoint;
     private GameObject rayoInstanciado;
+
     public Animator animator;
+
     public GameObject PiezaSensorPrefab;
+
+    // ðŸ”¹ Se mantienen los efectos (del HEAD)
+    public ParticleSystem efectoExplosion;
+    public ParticleSystem efectoDestello;
+
     public float vida = 100f;
-    public float daño = 7f;
+    public float daÃ±o = 7f;
 
     private bool estaMuerto = false;
 
@@ -19,6 +28,9 @@ public class Jammer : MonoBehaviour
     {
         agente = GetComponent<NavMeshAgent>();
         agente.speed = 7f;
+
+        if (efectoExplosion != null) efectoExplosion.Stop();
+        if (efectoDestello != null) efectoDestello.Stop();
     }
 
     void Update()
@@ -36,6 +48,7 @@ public class Jammer : MonoBehaviour
         if (objetivoCercano != null)
         {
             agente.SetDestination(objetivoCercano.transform.position);
+
             float distancia = Vector3.Distance(transform.position, objetivoCercano.transform.position);
 
             if (distancia <= 10f)
@@ -43,7 +56,6 @@ public class Jammer : MonoBehaviour
                 ActualizarRayo(objetivoCercano.transform.position);
                 animator.SetBool("IsAttack", true);
                 animator.SetBool("IsWalk", false);
-                // EnemyTurretAttack maneja el daño real, Jammer solo mueve el rayo visual
             }
             else
             {
@@ -60,20 +72,22 @@ public class Jammer : MonoBehaviour
         }
     }
 
-    public void RecibirDaño(float cantidad)
-    {
-        if (estaMuerto) return;
-        vida -= cantidad;
-        if (vida <= 0) Morir();
-    }
-
     void Morir()
     {
         if (estaMuerto) return;
+
         estaMuerto = true;
 
-        DesactivarRayo(); // el rayo desaparece siempre
+        DesactivarRayo();
 
+        // ðŸ”¹ Efectos visuales
+        if (efectoDestello != null)
+            Instantiate(efectoDestello, transform.position, transform.rotation);
+
+        if (efectoExplosion != null)
+            Instantiate(efectoExplosion, transform.position, transform.rotation);
+
+        // ðŸ”¹ Drop
         if (PiezaSensorPrefab != null)
             Instantiate(PiezaSensorPrefab, transform.position, Quaternion.identity);
 
@@ -92,7 +106,8 @@ public class Jammer : MonoBehaviour
         if (distanciaActual < 0.1f) return;
 
         rayoInstanciado.transform.position = origen + (direccion / 2f);
-        rayoInstanciado.transform.rotation = Quaternion.LookRotation(direccion) * Quaternion.Euler(90f, 0f, 0f);
+        rayoInstanciado.transform.rotation =
+            Quaternion.LookRotation(direccion) * Quaternion.Euler(90f, 0f, 0f);
 
         Vector3 escala = rayoInstanciado.transform.localScale;
         escala.y = distanciaActual / 2f;
@@ -116,18 +131,21 @@ public class Jammer : MonoBehaviour
     GameObject BuscarObjetivoMasCercano()
     {
         GameObject[] objetivos = GameObject.FindGameObjectsWithTag(tagObjetivo);
+
         GameObject masCercano = null;
         float distanciaMinima = Mathf.Infinity;
 
         foreach (GameObject obj in objetivos)
         {
             float d = Vector3.Distance(obj.transform.position, transform.position);
+
             if (d < distanciaMinima)
             {
                 distanciaMinima = d;
                 masCercano = obj;
             }
         }
+
         return masCercano;
     }
 }

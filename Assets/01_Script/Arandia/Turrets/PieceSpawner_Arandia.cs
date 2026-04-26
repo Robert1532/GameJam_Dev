@@ -1,6 +1,8 @@
 // PieceSpawner_Arandia.cs
 // Responsable: Arandia
-// Descripcion: Spawner de piezas que aparecen durante la tregua para que el jugador pueda reparar.
+// Descripcion: Spawner de
+//
+// que aparecen durante la tregua para que el jugador pueda reparar.
 
 using UnityEngine;
 

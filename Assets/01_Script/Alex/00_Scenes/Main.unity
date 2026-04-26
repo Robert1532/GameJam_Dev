@@ -428,6 +428,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LastMachine.Arandia.PlayerTurretConnector_Arandia
   repairSystem: {fileID: 220839826}
   inventory: {fileID: 220839828}
+  turretUI: {fileID: 0}
   interactRadius: 3.5
   turretLayer:
     serializedVersion: 2
