@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -31,6 +32,7 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
 
     RectTransform _rt;
     Text _label;
+    TextMeshProUGUI _tmpLabel;
     Vector3 _baseScale;
     Color _baseTextColor;
     bool _hover;
@@ -42,9 +44,12 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
         _rt = (RectTransform)transform;
         _baseScale = _rt.localScale;
         _label = GetComponentInChildren<Text>(true);
-        _hasLabel = _label != null;
-        if (_hasLabel)
+        _tmpLabel = _label == null ? GetComponentInChildren<TextMeshProUGUI>(true) : null;
+        _hasLabel = _label != null || _tmpLabel != null;
+        if (_label != null)
             _baseTextColor = _label.color;
+        else if (_tmpLabel != null)
+            _baseTextColor = _tmpLabel.color;
 
         _uiSfx = GetComponent<AudioSource>();
         if (_uiSfx == null)
@@ -88,10 +93,20 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
             return;
 
         var colorTarget = _hover || _pressed ? Brighten(_baseTextColor) : _baseTextColor;
-        if (force)
-            _label.color = colorTarget;
-        else
-            _label.color = Color.Lerp(_label.color, colorTarget, Time.unscaledDeltaTime * smooth);
+        if (_label != null)
+        {
+            if (force)
+                _label.color = colorTarget;
+            else
+                _label.color = Color.Lerp(_label.color, colorTarget, Time.unscaledDeltaTime * smooth);
+        }
+        else if (_tmpLabel != null)
+        {
+            if (force)
+                _tmpLabel.color = colorTarget;
+            else
+                _tmpLabel.color = Color.Lerp(_tmpLabel.color, colorTarget, Time.unscaledDeltaTime * smooth);
+        }
     }
 
     static Color Brighten(Color c) => Color.Lerp(c, Color.white, 0.28f);
@@ -157,9 +172,13 @@ public sealed class EdwinStartButtonHoverAnim : MonoBehaviour,
     {
         if (_label == null)
             _label = GetComponentInChildren<Text>(true);
-        _hasLabel = _label != null;
-        if (_hasLabel)
+        if (_tmpLabel == null && _label == null)
+            _tmpLabel = GetComponentInChildren<TextMeshProUGUI>(true);
+        _hasLabel = _label != null || _tmpLabel != null;
+        if (_label != null)
             _baseTextColor = _label.color;
+        else if (_tmpLabel != null)
+            _baseTextColor = _tmpLabel.color;
         ApplyTargets(force: true);
     }
 }

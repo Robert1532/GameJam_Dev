@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/00_Scenes/Edwin.unity
     guid: 1fe08785f91e59841b3b841240e5e756
   - enabled: 1
+    path: Assets/00_Scenes/Creditos.unity
+    guid: 6afdf8b0d0849fa4491f57bc22c3a1b6
+  - enabled: 1
     path: Assets/00_Scenes/Robert.unity
     guid: 166b068aa90b9c24b913024946d2db9c
   - enabled: 1

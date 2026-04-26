@@ -207,6 +207,7 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float startHoverVolume = 1f;
 
     [SerializeField] string nextSceneName = "Robert";
+    [SerializeField] string creditsSceneName = "Creditos";
 
     AudioSource _musicSource;
     AudioSource _uiSfxSource;
@@ -336,6 +337,9 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
     void OnCreditsClicked()
     {
         PlayStartClickSound();
+        if (string.IsNullOrWhiteSpace(creditsSceneName))
+            return;
+        StartCoroutine(LoadSceneAfterClickSfx(creditsSceneName));
     }
 
     void BuildUiFromSprites()
@@ -433,17 +437,17 @@ public sealed class EdwinMainMenuBootstrap : MonoBehaviour
         PlayStartClickSound();
         if (string.IsNullOrWhiteSpace(nextSceneName))
             return;
-        StartCoroutine(LoadNextSceneAfterClickSfx());
+        StartCoroutine(LoadSceneAfterClickSfx(nextSceneName));
     }
 
-    IEnumerator LoadNextSceneAfterClickSfx()
+    IEnumerator LoadSceneAfterClickSfx(string sceneName)
     {
         var clip = startButtonClickSfx;
         // Clips muy cortos: Unity a veces reporta duración casi 0; damos margen mínimo para el DSP.
         var len = clip != null ? clip.length : 0f;
         var wait = Mathf.Max(0.22f, len + 0.12f);
         yield return new WaitForSecondsRealtime(wait);
-        SceneManager.LoadScene(nextSceneName);
+        SceneManager.LoadScene(sceneName);
     }
 
     void ResolveMenuAudioClips()

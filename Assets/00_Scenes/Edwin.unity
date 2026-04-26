@@ -1508,6 +1508,7 @@ MonoBehaviour:
   startClickVolume: 1
   startHoverVolume: 1
   nextSceneName: Robert
+  creditsSceneName: Creditos
 --- !u!4 &1572403273
 Transform:
   m_ObjectHideFlags: 0
