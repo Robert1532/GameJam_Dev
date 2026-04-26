@@ -53,35 +53,35 @@ namespace LastMachine.Arandia
 
         void Update()
         {
-            if (currentTurret == null || isRepairing) return;
+//            if (currentTurret == null || isRepairing) return;
 
-            bool ePressed = false;
-            bool num1Down = false, num2Down = false, num3Down = false;
+//            bool ePressed = false;
+//            bool num1Down = false, num2Down = false, num3Down = false;
 
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                ePressed = Keyboard.current.eKey.isPressed;
-                num1Down = Keyboard.current.digit1Key.wasPressedThisFrame;
-                num2Down = Keyboard.current.digit2Key.wasPressedThisFrame;
-                num3Down = Keyboard.current.digit3Key.wasPressedThisFrame;
-            }
-#else
-            ePressed = Input.GetKey(KeyCode.E);
-            num1Down = Input.GetKeyDown(KeyCode.Alpha1);
-            num2Down = Input.GetKeyDown(KeyCode.Alpha2);
-            num3Down = Input.GetKeyDown(KeyCode.Alpha3);
-#endif
+//#if ENABLE_INPUT_SYSTEM
+//            if (Keyboard.current != null)
+//            {
+//                ePressed = Keyboard.current.eKey.isPressed;
+//                num1Down = Keyboard.current.digit1Key.wasPressedThisFrame;
+//                num2Down = Keyboard.current.digit2Key.wasPressedThisFrame;
+//                num3Down = Keyboard.current.digit3Key.wasPressedThisFrame;
+//            }
+//#else
+//            ePressed = Input.GetKey(KeyCode.E);
+//            num1Down = Input.GetKeyDown(KeyCode.Alpha1);
+//            num2Down = Input.GetKeyDown(KeyCode.Alpha2);
+//            num3Down = Input.GetKeyDown(KeyCode.Alpha3);
+//#endif
 
-            if (ePressed)
-            {
-                if (num1Down)
-                    StartRepair(currentTurret.sensor);
-                else if (num2Down)
-                    StartRepair(currentTurret.canon);
-                else if (num3Down)
-                    StartRepair(currentTurret.motor);
-            }
+//            if (ePressed)
+//            {
+//                if (num1Down)
+//                    StartRepair(currentTurret.sensor);
+//                else if (num2Down)
+//                    StartRepair(currentTurret.canon);
+//                else if (num3Down)
+//                    StartRepair(currentTurret.motor);
+//            }
         }
 
         public void StartRepair(TurretComponent_Arandia component)

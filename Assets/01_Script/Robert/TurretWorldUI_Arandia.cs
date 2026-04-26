@@ -20,6 +20,13 @@ namespace LastMachine.Arandia
         public Image motorFill;
         public TextMeshProUGUI motorText;
 
+        void Awake()
+        {
+            // 🔥 Auto-detectar torreta si no está asignada
+            if (turret == null)
+                turret = GetComponentInParent<TurretController_Arandia>();
+        }
+
         void Update()
         {
             if (turret == null) return;
@@ -31,28 +38,26 @@ namespace LastMachine.Arandia
 
         void UpdateBar(Image bar, TextMeshProUGUI txt, TurretComponent_Arandia comp)
         {
-            if (comp == null) return;
+            if (comp == null || bar == null || txt == null) return;
 
-            float pct = comp.HPPercent;
+            float pct = Mathf.Clamp01(comp.HPPercent);
 
-            // 🔹 Relleno
+            // 🔹 Fill
             bar.fillAmount = pct;
 
             // 🔹 Texto
             txt.text = Mathf.RoundToInt(pct * 100) + "%";
 
-            // 🔹 Color progresivo (verde → amarillo → rojo)
+            // 🔥 Color PROGRESIVO SUAVE (verde → amarillo → rojo REAL)
             Color color;
 
             if (pct > 0.5f)
             {
-                // Verde → Amarillo
                 float t = (pct - 0.5f) / 0.5f;
                 color = Color.Lerp(Color.yellow, Color.green, t);
             }
             else
             {
-                // Amarillo → Rojo
                 float t = pct / 0.5f;
                 color = Color.Lerp(Color.red, Color.yellow, t);
             }

@@ -86,12 +86,7 @@ namespace LastMachine.Arandia
 
             CleanEnemyList();
 
-            // INTERACCIÓN CON JUGADOR
-            if (playerInRange && IsInteractPressed())
-            {
-                Debug.Log($"[Interaccion] Abriendo HUD de {turretName}");
-                HUDBuilder_Arandia.Instance?.ShowTurretPanel(this);
-            }
+           
 
             // LÓGICA DEL SENSOR (APUNTADO)
             if (!sensor.IsBroken)

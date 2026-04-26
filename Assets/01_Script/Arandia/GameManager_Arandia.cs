@@ -1,20 +1,15 @@
-// GameManager_Arandia.cs
-// Responsable: Arandia
-// Descripcion: Maneja el estado general del juego: detecta Game Over cuando las 4
-//              torretas caen, muestra pantallas de derrota/victoria, y lleva el score.
-//              Coloca en un Empty "GameSystems" en la escena.
-
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 namespace LastMachine.Arandia
 {
     public class GameManager_Arandia : MonoBehaviour
     {
         [Header("Torretas - Arandia")]
-        public System.Collections.Generic.List<TurretController_Arandia> turrets = new System.Collections.Generic.List<TurretController_Arandia>();
+        public List<TurretController_Arandia> turrets = new List<TurretController_Arandia>();
 
         [Header("Referencia al WaveManager")]
         public WaveManager_Arandia waveManager;
@@ -40,42 +35,44 @@ namespace LastMachine.Arandia
 
         void Start()
         {
-            // Suscribirse a destrucción de torretas
             foreach (var turret in turrets)
             {
                 if (turret != null)
                     turret.OnTurretDestroyed += OnTurretDestroyed;
             }
 
-            // Suscribirse a victoria
             if (waveManager != null)
                 waveManager.OnGameWon += ShowVictory;
 
-            // Esconder paneles
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             if (victoryPanel != null) victoryPanel.SetActive(false);
 
-            // Botón retry
             if (retryButton != null)
                 retryButton.onClick.AddListener(RetryGame);
         }
 
         void Update()
         {
-            if (!isGameOver)
-                survivalTime += Time.deltaTime;
+            if (isGameOver) return;
+
+            survivalTime += Time.deltaTime;
+
+            // 🔥 NUEVO: chequeo global de componentes en 0
+            CheckAllTurretsDead();
         }
 
         // ──────────────────────────────────────────────
-        //  Callback: una torreta cayó
+        // TORRETAS DESTRUIDAS (sistema original)
         // ──────────────────────────────────────────────
 
         private void OnTurretDestroyed(TurretController_Arandia turret)
         {
-            turretsDestroyed++;
-            Debug.Log($"[Arandia] TORRETA DESTRUIDA: {turret.turretName}. Total caídas: {turretsDestroyed}/4");
+            if (isGameOver) return;
 
-            // Game Over: las 4 fueron destruidas
+            turretsDestroyed++;
+
+            Debug.Log($"[Arandia] TORRETA DESTRUIDA: {turret.turretName}. Total: {turretsDestroyed}/4");
+
             if (turretsDestroyed >= 4)
             {
                 GameOver();
@@ -83,13 +80,44 @@ namespace LastMachine.Arandia
         }
 
         // ──────────────────────────────────────────────
-        //  Game Over
+        // 🔥 NUEVO: TODOS LOS COMPONENTES EN 0
+        // ──────────────────────────────────────────────
+
+        void CheckAllTurretsDead()
+        {
+            if (turrets == null || turrets.Count == 0) return;
+
+            foreach (var t in turrets)
+            {
+                if (t == null) continue;
+
+                // Si algún componente AÚN tiene vida → NO game over
+                if (!IsComponentDead(t.sensor)) return;
+                if (!IsComponentDead(t.canon)) return;
+                if (!IsComponentDead(t.motor)) return;
+            }
+
+            // Si llega aquí → TODO está destruido
+            Debug.Log("[Arandia] Todos los componentes de todas las torretas están en 0");
+            GameOver();
+        }
+
+        bool IsComponentDead(TurretComponent_Arandia comp)
+        {
+            if (comp == null) return true;
+            return comp.CurrentHP <= 0f;
+        }
+
+        // ──────────────────────────────────────────────
+        // GAME OVER
         // ──────────────────────────────────────────────
 
         private void GameOver()
         {
+            if (isGameOver) return; // 🔥 evita duplicado
+
             isGameOver = true;
-            Time.timeScale = 0f; // Pausar el juego
+            Time.timeScale = 0f;
 
             Debug.Log("[Arandia] ═══ GAME OVER — La Fábrica ha caído ═══");
 
@@ -103,20 +131,23 @@ namespace LastMachine.Arandia
                 if (gameOverScore != null)
                 {
                     int wave = waveManager != null ? waveManager.CurrentWave : 0;
+
                     int min = Mathf.FloorToInt(survivalTime / 60f);
                     int sec = Mathf.FloorToInt(survivalTime % 60f);
-                    gameOverScore.text = $"Oleada alcanzada: {wave}\nTiempo: {min:00}:{sec:00}";
+
+                    gameOverScore.text =
+                        $"Oleada alcanzada: {wave}\nTiempo: {min:00}:{sec:00}";
                 }
             }
         }
 
         // ──────────────────────────────────────────────
-        //  Victoria
+        // VICTORIA
         // ──────────────────────────────────────────────
 
         private void ShowVictory()
         {
-            if (isGameOver) return; // No mostrar victoria si ya es game over
+            if (isGameOver) return;
 
             Time.timeScale = 0f;
 
@@ -133,13 +164,15 @@ namespace LastMachine.Arandia
                 {
                     int min = Mathf.FloorToInt(survivalTime / 60f);
                     int sec = Mathf.FloorToInt(survivalTime % 60f);
-                    victoryScore.text = $"10 oleadas sobrevividas\nTiempo total: {min:00}:{sec:00}";
+
+                    victoryScore.text =
+                        $"10 oleadas sobrevividas\nTiempo total: {min:00}:{sec:00}";
                 }
             }
         }
 
         // ──────────────────────────────────────────────
-        //  Retry
+        // RETRY
         // ──────────────────────────────────────────────
 
         public void RetryGame()
